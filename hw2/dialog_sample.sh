@@ -14,3 +14,7 @@ dialog --title "Pick a choice" --menu "Choose one" 12 35 5 \
 # checklist
 dialog --backtitle "Checklist" --checklist "Test" 20 50 10 \
 Memory Memory_Size 1 Dsik Disk_Size 2
+# extra buttons
+dialog --title "YES/NO BOX" --backtitle "BACKGROUND TITLE" \
+           --help-button --extra-button --extra-label "EXTRA" \
+           --ok-label "Agree" --yesno "QUERY TEXT" 0 0
