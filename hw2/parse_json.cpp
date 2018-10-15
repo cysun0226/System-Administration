@@ -28,7 +28,6 @@ void get_value(string str, std::size_t pos) {
       if (semi_colon_count == 2)
         continue;
       if (semi_colon_count == 3){
-        f_out << "  ";
         //cout << endl;
         break;
       }
@@ -45,6 +44,9 @@ void parse_json(string str){
     std::size_t pos = str.find(token[i]);
     if(pos < str.length()) {
       get_value(str, pos);
+      if(i == 0) {
+        f_out << " - ";
+      }
       if(i == 1)
         f_out << endl;
     }
