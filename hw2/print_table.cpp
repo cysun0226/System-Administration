@@ -5,9 +5,24 @@ using namespace std;
 
 std::string weekdays[] = { "Mon", "Tue", "Wed", "Thu", "Fri" };
 
+void print_bar() {
+  for (int i = 0; i < 80; i++) {
+    /* code */
+  }
+}
+
 void print_table() {
-   cout << "| " << std::left << setw(15) << "id" << "|  " << std::left << setw(18) << "type" << "|  " << std::left << setw(10) << "scope" << "|" << endl;
-   cout << "x  " <<
+   // title
+   cout << "x  ";
+   for (int i = 0; i < 5; i++) {
+     cout << '.';
+     cout << weekdays[i];
+     if (i == 4){
+       cout << endl;
+       break;
+     }
+     cout << "              ";
+   }
 }
 
 int main(int argc, char const *argv[]) {
