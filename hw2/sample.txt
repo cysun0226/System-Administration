@@ -1,4 +1,5 @@
-1GH4CD-SA321 Calculus (I)
-1GH4CD-SC206 Calculus (I)
-1GH4CD-SA214 Calculus (I)
-4CD-SC207 Calculus (I)
+1CD4GH-SC105 - Physics (I)
+3GH-AB101 - Career Planning and Mentor of Hours
+5IJK-EC122 - Competitive Programming (II)
+1G4CD-EC114 - Electrical Circuits and Electronics (I)
+2EF5B-EC315 - LabVIEW Programming Language
