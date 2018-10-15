@@ -25,6 +25,7 @@ dialog --backtitle "Test" --radiolist "Select option:" 15 35 3 \
  3 "Test 3" off
 # build list
 dialog --buildlist "Select a directory" 20 50 5 \
+  f0 "Directory Zero" off \
   f1 "Directory One" off \
-  f2 "Directory Two" on \
-  f3 "Directory Three" on
+  f2 "Directory Two" off \
+  f3 "Directory Three" off
