@@ -1,4 +1,4 @@
-1GH4CD-SA321  Calculus (I)  
-1GH4CD-SC206  Calculus (I)  
-1GH4CD-SA214  Calculus (I)  
-4CD-SC207  Calculus (I)  
+1GH4CD-SA321 Calculus (I)
+1GH4CD-SC206 Calculus (I)
+1GH4CD-SA214 Calculus (I)
+4CD-SC207 Calculus (I)
