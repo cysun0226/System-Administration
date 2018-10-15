@@ -18,3 +18,13 @@ Memory Memory_Size 1 Dsik Disk_Size 2
 dialog --title "YES/NO BOX" --backtitle "BACKGROUND TITLE" \
            --help-button --extra-button --extra-label "EXTRA" \
            --ok-label "Agree" --yesno "QUERY TEXT" 0 0
+# radio list
+dialog --backtitle "Test" --radiolist "Select option:" 15 35 3 \
+ 1 "Test 1" off \
+ 2 "Test 2" on \
+ 3 "Test 3" off
+# build list
+dialog --buildlist "Select a directory" 20 50 5 \
+  f1 "Directory One" off \
+  f2 "Directory Two" on \
+  f3 "Directory Three" on
