@@ -10,6 +10,7 @@ std::string weekdays[] = { "Mon", "Tue", "Wed", "Thu", "Fri" };
 std::string time_code[] = { "A", "B", "C", "D", "E", "F", "G", "H","I", "J", "K" };
 std::string timetable[11][5][4];
 char line[SIZE];
+std::fstream f_out;
 
 void print_bar() {
   for (int i = 0; i < 94; i++) {
@@ -23,24 +24,6 @@ void print_dbar() {
     cout << '=';
   }
   cout << endl;
-}
-
-int time_to_int(char t){
-  return t - '1';
-}
-
-int day_to_int(string d){
-  if (d == "Mon")
-    return 0;
-  if (d == "Tue")
-    return 1;
-  if (d == "Wed")
-    return 2;
-  if (d == "Thu")
-    return 3;
-  if (d == "Fri")
-    return 4;
-  return -1;
 }
 
 void print_table() {
@@ -124,12 +107,11 @@ void init_table() {
   for (int r = 0; r < 11; r++) {
     for (int c = 0; c < 5; c++) {
       for (int i = 0; i < 4; i++) {
-        timetable[r][c][i] = ".              ";
+        timetable[r][c][i] = "               ";
       }
     }
   }
 }
-
 
 int main(int argc, char const *argv[]) {
   std::vector<string> classes;
