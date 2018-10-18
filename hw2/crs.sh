@@ -18,7 +18,7 @@ if [ ! -f "./data/cur_class.txt" ]; then
    cat > cur_class.txt
 fi
 ## display option
-display_opt=0
+show_classroom=0
 hide_col=0
 opt1_str='Show Classroom'
 opt2_str='Hide Extra Column'
@@ -26,17 +26,17 @@ opt2_str='Hide Extra Column'
 ### functions ---------------
 handle_option()
 {
-  opt=$1
-  case $opt in
-    0) display_opt=1-$display_opt
-       if [ display_opt = 0 ];
+  ipt=$1
+  case $ipt in
+    op1) show_classroom=$(expr 1 - $show_classroom)
+       if [ $show_classroom = 0 ];
        then
          opt1_str='Show Classroom'
        else
          opt1_str='Show Class Name'
        fi
        ;;
-    1) echo "op2"
+    op2) echo "op2"
        break
        ;;
   esac
@@ -86,7 +86,12 @@ esac
 
 # display timetable
 while [ $response != 2 ]; do
-  timetable=$(./print_table.out ./data/cur_class.txt)
+  if [ $show_classroom = 0 ]
+    then
+      timetable=$(./print_table.out ./data/cur_class.txt)
+    else
+      timetable=$(./print_table.out ./data/cur_class.txt show_classroom)
+  fi
   dialog --no-collapse --title "Timetable" \
              --help-button --help-label "Exit" \
              --extra-button --extra-label "Option" \
@@ -99,9 +104,9 @@ while [ $response != 2 ]; do
     2) break
        ;;
     3) echo "Option"
-       dialog --title "Option" --menu "Choose one" 12 35 5 \
-       op1 "$opt1_str" op2 "$opt2_str"
-       handle_option $?
+       opt=$(dialog --title "Option" --menu "Choose one" 12 35 5 \
+       op1 "$opt1_str" op2 "$opt2_str" --output-fd 1)
+       handle_option $opt
        ;;
   esac
 done
