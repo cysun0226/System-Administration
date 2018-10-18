@@ -9,8 +9,10 @@ using namespace std;
 std::string weekdays[] = { "Mon", "Tue", "Wed", "Thu", "Fri" };
 std::string time_code[] = { "A", "B", "C", "D", "E", "F", "G", "H","I", "J", "K" };
 std::string timetable[11][5][4];
+std::string roomtable[11][5][4];
 char line[SIZE];
-std::fstream f_out;
+bool show_classroom = false;
+
 
 void print_bar() {
   for (int i = 0; i < 94; i++) {
@@ -83,14 +85,19 @@ void fill_timetable(int row, int col, string class_name) {
 
 void parse_time(string c) {
   int pos = c.find('-');
+  string classroom = c.substr(pos+1, c.length());
+  // classroom
+  int sec_pos = classroom.find('-');
+  classroom = classroom.substr(0, sec_pos-1);
   // time
+
   string class_time = c.substr(0, pos);
   c = c.substr(pos+1, c.length()-1);
   pos = c.find('-');
   string class_name = c.substr(pos+2, c.length()-1);
+
   int row, col;
   for (int i = 0; i < class_time.length(); i++) {
-
     // weekday
     if (class_time[i] >= '1' && class_time[i] <= '5') {
       col = class_time[i] - '1';
@@ -98,7 +105,10 @@ void parse_time(string c) {
     // time
     if (class_time[i] >= 'A' && class_time[i] <= 'K') {
       row = class_time[i] - 'A';
-      fill_timetable(row, col, class_name);
+      if (show_classroom)
+        fill_timetable(row, col, classroom);
+      else
+        fill_timetable(row, col, class_name);
     }
   }
 }
@@ -117,15 +127,11 @@ int main(int argc, char const *argv[]) {
   std::vector<string> classes;
   fstream fin;
   fin.open(argv[1],ios::in);
+  show_classroom = (argc > 2)? true : false;
   init_table();
   while(fin.getline(line,sizeof(line),'\n')){
       parse_time(line);
   }
-  // cout << "test" << endl;
-  // cout << "timetable[2][0][0] = " << timetable[2][0][0] << endl;
   print_table();
-
-
-
   return 0;
 }
