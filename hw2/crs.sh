@@ -29,17 +29,41 @@ handle_option()
   opt=$1
   case $opt in
     0) display_opt=1-$display_opt
-       if [[ display_opt=0 ]];
+       if [ display_opt = 0 ];
        then
-         show_opt='Show Classroom'
+         opt1_str='Show Classroom'
        else
-         show_opt='Show Class Name'
+         opt1_str='Show Class Name'
        fi
        ;;
     1) echo "op2"
        break
        ;;
   esac
+}
+
+add_class()
+{
+  filename='classes.txt'
+  IFS=$'\n' read -d '' -r -a class < $filename
+  filename='./data/cur_class.txt'
+  IFS=$'\n' read -d '' -r -a added_class < $filename
+  for i in ${!class[@]}
+  do
+  status='off'
+    for a in ${!added_class[@]}; do
+      if [ "${class[$i]}" = "${added_class[$a]}" ]; then
+        # echo "class[$i]=${class[$i]}"
+        # echo "added_class[$i]=${class[$i]}"
+        status='on'
+      fi
+    done
+  class_items+=( "${class[$i]}" "${class[$i]}" "$status" )
+  done
+  # buildlist
+  usr_input=$(dialog --buildlist "Add a class" 30 100 20 "${class_items[@]}" --output-fd 1)
+  cur_class=$(sed 's@\\@@g' <<< $usr_input)
+  eval 'for word in '$cur_class'; do echo $word; done' > ./data/cur_class.txt
 }
 
 
@@ -61,7 +85,7 @@ case $response in
 esac
 
 # display timetable
-
+while [ $response != 2 ]; do
   timetable=$(./print_table.out ./data/cur_class.txt)
   dialog --no-collapse --title "Timetable" \
              --help-button --help-label "Exit" \
@@ -70,14 +94,14 @@ esac
 
   response=$?
   case $response in
-    0) ./add_class.sh
+    0) add_class
        ;;
-    2) echo "Exit"
-       break
+    2) break
        ;;
     3) echo "Option"
        dialog --title "Option" --menu "Choose one" 12 35 5 \
-       op1 "$show_opt" op2 "$opt2_str"
+       op1 "$opt1_str" op2 "$opt2_str"
        handle_option $?
        ;;
   esac
+done
