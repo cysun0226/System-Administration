@@ -20,7 +20,7 @@
 2CD4G-ED302 - Mathematical Logic\r
 2B5EF-EC115 - Digital Systems Design
 2A-AB101 - Service Learning II
-1G4CD-EC114 - Electrical Circuits and Electronics (I)  
+1G4CD-EC114 - Electrical Circuits and Electronics (I)
 2EFG-EC016 - Design and Implementation of IOT Applications
 2G5CD-EC115 - Introduction to Cryptography
 2IJK-EC220,5CD-EC114 - Digital Circuit Lab.
@@ -47,7 +47,7 @@
 1EF-AB101 - Computer Science Seminars
 3IJK-EC220,5EF-ED117 - Microprocessor System Lab.
 1IJK-EC220,5EF-EDB27 - Microprocessor System Lab.
-3CD5G-EC022 - Probability 
+3CD5G-EC022 - Probability
 2CD4G-EC114 - Introduction to Algorithms
 2CD4G-EC122 - Introduction to Algorithms
 3GH-EDB27 - Computer Science and Engineering Projects (II)
@@ -116,7 +116,7 @@
 2CD4G-ED302 - Mathematical Logic\r
 2B5EF-EC115 - Digital Systems Design
 2A-AB101 - Service Learning II
-1G4CD-EC114 - Electrical Circuits and Electronics (I)  
+1G4CD-EC114 - Electrical Circuits and Electronics (I)
 2EFG-EC016 - Design and Implementation of IOT Applications
 2G5CD-EC115 - Introduction to Cryptography
 2IJK-EC220,5CD-EC114 - Digital Circuit Lab.
@@ -128,3 +128,4 @@
 1G4CD-ED117 - Intro. to Network Programming
 1CD3B-EDB27 - Introduction to Computer Graphics
 4IJK-EC122 - Computer System Administration
+3CDX-EC329 - User-Centered Interaction Design
