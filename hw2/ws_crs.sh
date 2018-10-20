@@ -5,6 +5,12 @@ init()
   IFS=$'\n' read -d '' -r -a class < $filename
 }
 
+show_classroom=0
+show_extra=0
+time_conflict=0
+opt1_str='Show Classroom'
+opt2_str='Show Extra Column'
+
 ### main ----------------------
 
 dialog --title "Check Courses Data" \
@@ -20,3 +26,10 @@ dialog --title "Check Courses Data" \
  esac
 
  init
+
+timetable=$(./print_table.out ./data/cur_class.txt $show_classroom $show_extra)
+
+dialog --no-collapse --title "Timetable" \
+           --help-button --help-label "Exit" \
+           --extra-button --extra-label "Option" \
+           --ok-label "Add Class" --msgbox "$timetable" 50 130
