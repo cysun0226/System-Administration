@@ -221,7 +221,7 @@ int main(int argc, char const *argv[]) {
   }
 
   if (time_conflict)
-    cout << "conflict!" << endl;
+    cout << "conflict" << endl;
   else {
     if (!show_extra)
       print_table();
