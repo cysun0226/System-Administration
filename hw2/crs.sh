@@ -40,9 +40,9 @@ handle_option()
     op2) show_extra=$(expr 1 - $show_extra)
        if [ $show_extra = 0 ];
        then
-         opt2_str='Show extra column'
+         opt2_str='Show Extra Column'
        else
-         opt2_str='Hide extra column'
+         opt2_str='Hide Extra Column'
        fi
        ;;
   esac
