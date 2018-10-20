@@ -33,3 +33,20 @@ dialog --no-collapse --title "Timetable" \
            --help-button --help-label "Exit" \
            --extra-button --extra-label "Option" \
            --ok-label "Add Class" --msgbox "$timetable" 50 130
+
+response=$?
+case $response in
+  0) echo "add_class"
+  # 0) add_class
+  #   while [ $time_conflict = 1 ]; do
+  #     add_class
+  #   done
+    ;;
+  2) break
+    ;;
+  3) echo "Option"
+    opt=$(dialog --title "Option" --menu "Choose one" 12 35 5 \
+    op1 "$opt1_str" op2 "$opt2_str" --output-fd 1)
+    # handle_option $opt
+    ;;
+esac
