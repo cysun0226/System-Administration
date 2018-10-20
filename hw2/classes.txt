@@ -110,8 +110,6 @@
 2EF- - Physcial Education
 2EF- - Physcial Education
 3GH-AB101 - Career Planning and Mentor of Hours
-5IJK-EC122 - Competitive Programming (II)
-6EFG-ED302 - Competitive Programming(III)
 2EF5B-EC315 - LabVIEW Programming Language
 2CD4G-ED302 - Mathematical Logic\r
 2B5EF-EC115 - Digital Systems Design
