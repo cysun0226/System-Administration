@@ -48,13 +48,9 @@ ex_time_code='M N A B C D X E F G H Y I J K L'
 
 
 # declare array
-for (( i = 0; i < 7; i++ )); do
-  eval "wd_$i=$i"
-done
-
-for (( r = 0; r < 11; r++ )); do
-  for (( c = 0; c < 5; c++ )); do
-    for (( l = 0; l < 4; l++ )); do
+for r in $(seq 11); do
+  for c in $(seq 5); do
+    for l in $(seq 4); do
       eval "timetable_${r}_${c}_${l}='#############.'"
     done
   done
@@ -66,7 +62,7 @@ ARRAY_3_1=zzz
 # timetable_0_2_3=yeah
 
 # get_2d_value timetable _4 _1 _2
-get_3d_value timetable_ 0 _2 _3
+get_3d_value timetable_ 1 _2 _3
 # get_3d_value timetable_ 0 _2 _3
 
 # get_array_value ARRAY_ 3
