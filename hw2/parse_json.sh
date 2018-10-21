@@ -12,8 +12,9 @@ get_value()
 
 parse_json()
 {
-  token=('cos_time' 'cos_ename')
-  for t in "${token[@]}"; do
+  token=("cos_time" "cos_ename")
+  for t in "${token[@]}"
+  do
     pos=$(echo $1 | grep -b -o "$t" | cut -d: -f1)
     if [ "$pos" != "" ]; then
       echo $pos
