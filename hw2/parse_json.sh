@@ -10,17 +10,17 @@ get_value()
   # done < <(echo -n "$1")
 }
 
-parse_json()
-{
-  token=("cos_time" "cos_ename")
-  for t in "${token[@]}"
-  do
-    pos=$(echo $1 | grep -b -o "$t" | cut -d: -f1)
-    if [ "$pos" != "" ]; then
-      echo $pos
-    fi
-  done
-}
+# parse_json()
+# {
+#   token=("cos_time" "cos_ename")
+#   for t in "${token[@]}"
+#   do
+#     pos=$(echo $1 | grep -b -o "$t" | cut -d: -f1)
+#     if [ "$pos" != "" ]; then
+#       echo $pos
+#     fi
+#   done
+# }
 
 # main
 raw_file='raw_timetable.json'
@@ -28,7 +28,9 @@ prep_file='pre_classes.txt'
 # echo $raw_data
 
 # parse_json '"cos_ename":"Calculus(I)",'
-get_value '"cos_ename":"Calculus(I)",'
+# get_value '"cos_ename":"Calculus(I)",'
+
+token=("cos_time" "cos_ename")
 
 while read -n1 c; do
   pre_process+="$c"
