@@ -178,7 +178,6 @@ done
 # main =====
 
 while read p; do
-  echo "$1"
   parse_class "$p"
 done < $1
 
