@@ -108,6 +108,7 @@ parse_class()
     echo $c
     # weekday
     if echo "$c" | grep -q '[1-7]'; then
+      echo "weekday"
       col=$c
     fi
     # # time
