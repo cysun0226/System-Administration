@@ -1,15 +1,23 @@
 
+# variables
+show_classroom=0
+show_extra=0
+time_conflict=0
+opt1_str='Show Classroom'
+opt2_str='Show Extra Column'
+
 init()
 {
   filename='classes.txt'
   IFS=$'\n' read -d '' -r -a class < $filename
 }
 
-show_classroom=0
-show_extra=0
-time_conflict=0
-opt1_str='Show Classroom'
-opt2_str='Show Extra Column'
+add_class()
+{
+  echo "add_class"
+}
+
+
 
 ### main ----------------------
 
@@ -21,13 +29,13 @@ dialog --title "Check Courses Data" \
  response=$?
  case $response in
    0) echo "Please input curl URL:";;
-   1) echo "Go on.";;
+   1) echo "generate table...";;
    255) echo "[ESC] key pressed.";;
  esac
 
  init
 
-timetable=$(./print_table.out ./data/cur_class.txt $show_classroom $show_extra)
+timetable=$(./print_table.sh ./sample_sh.txt | sed 's/#/\ /g')
 
 dialog --no-collapse --title "Timetable" \
            --help-button --help-label "Exit" \
@@ -36,8 +44,7 @@ dialog --no-collapse --title "Timetable" \
 
 response=$?
 case $response in
-  0) echo "add_class"
-  # 0) add_class
+  0) add_class
   #   while [ $time_conflict = 1 ]; do
   #     add_class
   #   done
