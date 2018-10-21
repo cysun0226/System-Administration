@@ -183,7 +183,6 @@ class_file='sample_sh.txt'
 # echo "$timetable_2_4_1"
 
 while read p; do
-  echo "$p"
   parse_class "$p"
 done < $class_file
 
