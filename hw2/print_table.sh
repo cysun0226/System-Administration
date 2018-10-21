@@ -71,9 +71,19 @@ print_table()
     done
     print_bar $(expr $grid_width \* 5 + 19)
   done
+}
 
+parse_class()
+{
+  q_pos=$(echo $1 | awk -F? '{print length($1)+1}')
+  e_pos=$(echo -n $1 | wc -m)
+  q_pos=$(expr $q_pos + 1)
+  name=$(echo $1 | cut -c $q_pos-26)
+  q_pos=$(expr $q_pos - 2)
+  time=$(echo $1 | cut -c 1-$q_pos)
 
-
+  echo $time
+  echo $name
 }
 
 # declare
@@ -93,4 +103,10 @@ for r in $(seq 11); do
 done
 
 # main =====
-print_table
+class_file='sample.txt'
+
+parse_class '4CD-SC207?Calculus (I)'
+
+# while read p; do
+#   echo $p
+# done < $class_file
