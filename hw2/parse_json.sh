@@ -3,7 +3,7 @@
 get_value()
 {
   s_pos=$(echo $1 | awk -F: '{print length($1)+1}')
-  e_pos=$(echo -n $1 | wc -m)
+  e_pos=${#1}
   s_pos=$(expr $s_pos + 2)
   e_pos=$(expr $e_pos - 2) # mac-6;bsd-2
   sc_cnt=0
@@ -32,13 +32,9 @@ parse_json()
   fi
 }
 
-# main
+# main ======
 raw_file='raw_timetable.json'
 prep_file='pre_classes.txt'
-# echo $raw_data
-
-# parse_json '"cos_ename":"Calculus(I)",'
-# get_value '"cos_ename":"Calculus(I)",'
 
 # insert new line into .json
 cat "$raw_file" | sed 's/'{'/{\'$'\n/g' | sed 's/'}'/}\'$'\n/g' | sed 's/','/,\'$'\n/g'  > "$prep_file"
