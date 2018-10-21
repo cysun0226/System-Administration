@@ -43,7 +43,7 @@ print_table()
     printf '| '
     printf '%s' $d
     get_space $(expr $grid_width - 2)
-    if $d = 'Fri' ; then
+    if [ "$d" = 'Fri' ] ; then
       printf '|\n'
     fi
   done
