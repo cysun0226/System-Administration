@@ -73,10 +73,10 @@ print_table()
   done
 }
 
-fill_timetable()
-{
-
-}
+# fill_timetable()
+# {
+#
+# }
 
 parse_class()
 {
@@ -103,8 +103,9 @@ parse_class()
 
   re='^[0-9]+$'
 
-  for i in $(seq 0 ${#time}); do
-    c=${time:$i:1}
+  for i in $(seq ${#time}); do
+    c=$(echo "$time" | cut -c $i-$i)
+    echo $c
     # weekday
     if echo "$c" | grep -q '[1-7]'; then
       col=$c
