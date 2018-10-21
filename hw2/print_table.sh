@@ -176,14 +176,10 @@ for r in $(seq 11); do
 done
 
 # main =====
-class_file='sample_sh.txt'
-
-# parse_class '4CD-SC207?Calculus (I)'
-# parse_class '1EF4B-EC11?Introduction to Computers and Programming'
-# echo "$timetable_2_4_1"
 
 while read p; do
+  echo "$1"
   parse_class "$p"
-done < $class_file
+done < $1
 
 print_table
