@@ -8,8 +8,10 @@ get_2d_value()
 
 get_3d_value()
 {
-  current_value=$1$2$3$4
-  eval printf '%s' "\$$current_value"
+  id=$1$2$3$4
+  eval value="\$$id"
+  printf '%s' "$value"
+
 }
 
 print_bar()
@@ -54,47 +56,63 @@ get_time()
 
 print_table()
 {
-  print_bar $(expr $grid_width \* 5 + 19)
+  print_bar $(expr $grid_width \* 5 + 24)
   printf '   '
   for d in $weekday; do
     printf '| '
     printf '%s' $d
-    get_space $(expr $grid_width - 2)
+    get_space $(expr $grid_width - 1)
     if [ "$d" = 'Fri' ] ; then
       printf '|\n'
     fi
   done
-  print_dbar $(expr $grid_width \* 5 + 19)
+  print_dbar $(expr $grid_width \* 5 + 24)
 
   t_idx=0
   for t in $time_code; do
     t_idx=$(expr $t_idx + 1)
     # time row
-    printf ' %s ' $t
+    printf ' %s' $t
     for w in $(seq 5); do
-      printf '| '
+      printf ' | '
       get_3d_value timetable "_$t_idx" "_$w" _1
     done
-    printf '|\n'
+    printf ' |\n'
 
     # grid
     for g in 2 3 4; do
-      printf '   '
+      printf '  '
       for w in 1 2 3 4 5; do
-        printf '| '
+        printf ' | '
         get_3d_value timetable "_$t_idx" "_$w" "_$g"
       done
-      printf '|\n'
+      printf ' |\n'
     done
-    print_bar $(expr $grid_width \* 5 + 19)
+    print_bar $(expr $grid_width \* 5 + 24)
   done
 }
 
 fill_timetable()
 {
-  f_cn=$3
-  # lc=$(expr ${#$1} / $grid_width)
-  echo ${#f_cn}
+  # $1 row / $2 col / $3 name
+  lc=$(expr ${#3} / $grid_width + 1)
+
+  for i in $(seq $lc); do
+    grid_row=''
+    # i*GRID_LEN
+    igl=$(expr $i \* $grid_width - $grid_width + 1 )
+    # (i+1)*GRID_LEN
+    ipl=$(expr $i \* $grid_width )
+    if [ ${#3} -gt $ipl ];
+    then
+      grid_row=$(echo "$3" | cut -c $igl-$(expr $igl + $grid_width))
+    else
+      grid_row=$(echo "$3" | cut -c $igl-$(expr ${#3} + 1 ))
+      grid_row="$grid_row$(echo '###############' | cut -c 1-$(expr $ipl - ${#3} + 1))" # fill the row
+    fi
+    eval "timetable_${row}_${col}_${i}=\"$grid_row\""
+    # echo "$grid_row"
+  done
   # echo $(expr length "$1")
 
 }
@@ -102,39 +120,37 @@ fill_timetable()
 parse_class()
 {
   q_pos=$(echo "$1" | awk -F? '{print length($1)+1}')
-  e_pos=$(echo -n "$1" | wc -m)
-  e_pos=$(expr $e_pos - 1)
   q_pos=$(expr $q_pos + 1)
-  name=$(echo "$1" | cut -c $q_pos-$e_pos)
+  name=$(echo "$1" | cut -c $q_pos-${#1})
   q_pos=$(expr $q_pos - 2)
   time=$(echo "$1" | cut -c 1-$q_pos)
 
   # classroom
   d_pos=$(echo $time | awk -F- '{print length($1)+1}')
   d_pos=$(expr $d_pos + 1)
-  e_pos=$(echo -n "$time" | wc -m)
-  e_pos=$(expr $e_pos - 1)
-  room=$(echo "$time" | cut -c $d_pos-$e_pos)
+  room=$(echo "$time" | cut -c $d_pos-${#time})
   d_pos=$(expr $d_pos - 2)
   time=$(echo "$time" | cut -c 1-$d_pos)
 
-  echo "$name"
-  echo "$time"
-  echo "$room"
-
-  re='^[0-9]+$'
+  # echo "$name"
+  # echo "$time"
+  # echo "$room"
 
   for i in $(seq ${#time}); do
     c=$(echo "$time" | cut -c $i-$i)
-    echo $c
+    # echo $c
     # weekday
-    if echo "$c" | grep -q '[1-5]'; then
+    if_w=$(echo "$c" | grep '[1-7]')
+    if [ "$if_w" != "" ]; then
       col=$c
     fi
     # time
     if echo "$c" | grep -q '[A-K]'; then
       row=$(get_time $c)
-    fill_timetable $row $col $name
+      if_w=$(echo "$col" | grep '[1-5]')
+      if [ "$if_w" != "" ]; then
+        fill_timetable $row $col "$name"
+      fi
     fi
 
   done
@@ -160,11 +176,15 @@ for r in $(seq 11); do
 done
 
 # main =====
-class_file='sample.txt'
+class_file='sample_sh.txt'
 
-parse_class '4CD-SC207?Calculus (I)'
-parse_class '1EF4B-EC11?Introduction to Computers and Programming'
+# parse_class '4CD-SC207?Calculus (I)'
+# parse_class '1EF4B-EC11?Introduction to Computers and Programming'
+# echo "$timetable_2_4_1"
 
-# while read p; do
-#   echo $p
-# done < $class_file
+while read p; do
+  echo "$p"
+  parse_class "$p"
+done < $class_file
+
+print_table
