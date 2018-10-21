@@ -1,3 +1,5 @@
+#!/bin/sh
+
 get_value()
 {
   # semi_colon_count = 0;
@@ -10,7 +12,7 @@ get_value()
 
 parse_json()
 {
-  token=("cos_time" "cos_ename")
+  token=('cos_time' 'cos_ename')
   for t in "${token[@]}"; do
     pos=$(echo $1 | grep -b -o "$t" | cut -d: -f1)
     if [ "$pos" != "" ]; then
