@@ -2,7 +2,7 @@
 
 get_value()
 {
-  s_pos=$(awk -F: '{print length($1)+1}' <<< $1)
+  s_pos=$(echo $1 | awk -F: '{print length($1)+1}')
   e_pos=$(echo -n $1 | wc -m)
   s_pos=$(expr $s_pos + 2)
   e_pos=$(expr $e_pos - 6)
