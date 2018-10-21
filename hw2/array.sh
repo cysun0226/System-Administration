@@ -34,7 +34,7 @@ get_3d_value()
 # ARRAY_2=two
 # ARRAY_3=333
 
-for (( i = 0; i < 10; i++ )); do
+for i in $(seq 10); do
   eval "ARRAY_$i=$i"
 done
 
