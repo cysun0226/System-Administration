@@ -35,6 +35,23 @@ get_space()
   done
 }
 
+get_time()
+{
+  case $1 in
+    A) echo 1 ;;
+    B) echo 2 ;;
+    C) echo 3 ;;
+    D) echo 4 ;;
+    E) echo 5 ;;
+    F) echo 6 ;;
+    G) echo 7 ;;
+    H) echo 8 ;;
+    I) echo 9 ;;
+    J) echo 10 ;;
+    K) echo 11 ;;
+  esac
+}
+
 print_table()
 {
   print_bar $(expr $grid_width \* 5 + 19)
@@ -73,10 +90,14 @@ print_table()
   done
 }
 
-# fill_timetable()
-# {
-#
-# }
+fill_timetable()
+{
+  f_cn=$3
+  # lc=$(expr ${#$1} / $grid_width)
+  echo ${#f_cn}
+  # echo $(expr length "$1")
+
+}
 
 parse_class()
 {
@@ -107,14 +128,14 @@ parse_class()
     c=$(echo "$time" | cut -c $i-$i)
     echo $c
     # weekday
-    if echo "$c" | grep -q '[1-7]'; then
-      echo "weekday"
+    if echo "$c" | grep -q '[1-5]'; then
       col=$c
     fi
-    # # time
-    # if echo "$c" | grep -q '[A-K]'; then
-    #
-    # fi
+    # time
+    if echo "$c" | grep -q '[A-K]'; then
+      row=$(get_time $c)
+    fill_timetable $row $col $name
+    fi
 
   done
 
