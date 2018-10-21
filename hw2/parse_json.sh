@@ -30,12 +30,12 @@ prep_file='pre_classes.txt'
 parse_json '"cos_ename":"Calculus(I)",'
 # get_value '"cos_ename":"Calculus(I)",'
 
-while read -n1 c; do
-  pre_process+="$c"
-  if [ "$c" = '{' ] || [ "$c" = '}' ] || [ "$c" = ',' ];
-  then
-    pre_process+='\n'
-  fi
-done < $raw_file
+cat "$raw_file" | sed 's/'{'/{\'$'\n/g' | sed 's/'}'/}\'$'\n/g' | sed 's/','/,\'$'\n/g'  > "$prep_file"
 
-echo "$pre_process" > "$prep_file"
+# while read -n1 c; do
+#   pre_process+="$c"
+#   if [ "$c" = '{' ] || [ "$c" = '}' ] || [ "$c" = ',' ];
+#   then
+#     pre_process+='\n'
+#   fi
+# done < $raw_file
