@@ -3,13 +3,13 @@
 get_2d_value()
 {
   current_value=$1$2$3
-  eval echo \$$current_value
+  eval printf '%s' \$$current_value
 }
 
 get_3d_value()
 {
   current_value=$1$2$3$4
-  eval echo "\$$current_value"
+  eval printf '%s' "\$$current_value"
 }
 
 print_bar()
@@ -49,9 +49,28 @@ print_table()
   done
   print_dbar $(expr $grid_width \* 5 + 19)
 
-  # for t in $time_code; do
-  #
-  # done
+  t_idx=0
+  for t in $time_code; do
+    t_idx=$(expr $t_idx + 1)
+    # time row
+    printf ' %s ' $t
+    for w in $(seq 5); do
+      printf '| '
+      get_3d_value timetable "_$t_idx" "_$w" _1
+    done
+    printf '|\n'
+
+    # grid
+    for g in 2 3 4; do
+      printf '   '
+      for w in 1 2 3 4 5; do
+        printf '| '
+        get_3d_value timetable "_$t_idx" "_$w" "_$g"
+      done
+      printf '|\n'
+    done
+    print_bar $(expr $grid_width \* 5 + 19)
+  done
 
 
 
@@ -68,7 +87,7 @@ grid_width=14
 for r in $(seq 11); do
   for c in $(seq 5); do
     for l in $(seq 4); do
-      eval "timetable_${r}_${c}_${l}='#############.'"
+      eval "timetable_${r}_${c}_${l}='###############'"
     done
   done
 done
