@@ -73,17 +73,51 @@ print_table()
   done
 }
 
+fill_timetable()
+{
+
+}
+
 parse_class()
 {
-  q_pos=$(echo $1 | awk -F? '{print length($1)+1}')
-  e_pos=$(echo -n $1 | wc -m)
+  q_pos=$(echo "$1" | awk -F? '{print length($1)+1}')
+  e_pos=$(echo -n "$1" | wc -m)
+  e_pos=$(expr $e_pos - 1)
   q_pos=$(expr $q_pos + 1)
-  name=$(echo $1 | cut -c $q_pos-26)
+  name=$(echo "$1" | cut -c $q_pos-$e_pos)
   q_pos=$(expr $q_pos - 2)
-  time=$(echo $1 | cut -c 1-$q_pos)
+  time=$(echo "$1" | cut -c 1-$q_pos)
 
-  echo $time
-  echo $name
+  # classroom
+  d_pos=$(echo $time | awk -F- '{print length($1)+1}')
+  d_pos=$(expr $d_pos + 1)
+  e_pos=$(echo -n "$time" | wc -m)
+  e_pos=$(expr $e_pos - 1)
+  room=$(echo "$time" | cut -c $d_pos-$e_pos)
+  d_pos=$(expr $d_pos - 2)
+  time=$(echo "$time" | cut -c 1-$d_pos)
+
+  echo "$name"
+  echo "$time"
+  echo "$room"
+
+  re='^[0-9]+$'
+
+  for i in $(seq 0 ${#time}); do
+    c=${time:$i:1}
+    # weekday
+    if echo "$c" | grep -q '[1-7]'; then
+      col=$c
+    fi
+    # # time
+    # if echo "$c" | grep -q '[A-K]'; then
+    #
+    # fi
+
+  done
+
+
+
 }
 
 # declare
@@ -106,6 +140,7 @@ done
 class_file='sample.txt'
 
 parse_class '4CD-SC207?Calculus (I)'
+parse_class '1EF4B-EC11?Introduction to Computers and Programming'
 
 # while read p; do
 #   echo $p
