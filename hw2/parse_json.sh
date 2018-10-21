@@ -5,7 +5,7 @@ get_value()
   s_pos=$(echo $1 | awk -F: '{print length($1)+1}')
   e_pos=$(echo -n $1 | wc -m)
   s_pos=$(expr $s_pos + 2)
-  e_pos=$(expr $e_pos - 6)
+  e_pos=$(expr $e_pos - 2) # mac-6;bsd-2
   sc_cnt=0
   n=$(echo $1 | cut -c $s_pos-$e_pos)
   printf '%s' "$n"
