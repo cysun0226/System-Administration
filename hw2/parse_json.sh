@@ -1,5 +1,3 @@
-#!/bin/sh
-
 get_value()
 {
   # semi_colon_count = 0;
