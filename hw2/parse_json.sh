@@ -2,21 +2,97 @@
 
 get_value()
 {
-  s_pos=$(echo $1 | awk -F: '{print length($1)+1}')
-  e_pos=${#1}
-  s_pos=$(expr $s_pos + 2)
-  e_pos=$(expr $e_pos - 2) # mac-6;bsd-2
-  sc_cnt=0
-  n=$(echo $1 | cut -c $s_pos-$e_pos)
-  printf '%s' "$n"
+  v=$(echo $1 | cut -d':' -f2 | sed 's/.$//')
 
-  # while read -n1 c; do
-  #   echo "$c"
-  # done < <(echo -n "$1")
+  case $v in
+    ''|*[!0-9]*) ;;
+    *)
+      # is number
+      # check if redundant
+      rdd=0
+        for i in $exist_id; do
+          if [ "$v" = "$i" ]; then
+            rdd=1
+            break
+          fi
+        done
+      if [ "$rdd" = "0" ]; then
+         exist_id="$exist_id $v"
+      fi
+    ;;
+  esac
+
+  if [ "$rdd" = "1" ]; then
+    return
+  fi
+
+  printf '%s\n' "$v"
+
+  # if [ -n "$v" ] && [ "$v" -eq "$v" ] 2>/dev/null; then
+  #   echo number
+  # else
+  #   echo not a number
+  # fi
+
+
+  # if [ -n "$v" ] && [ "$v" -eq "$v" ] 2>/dev/null;
+  # then
+  #   # is number
+  #   # check if redundant
+  #   echo "number"
+  #   rdd=0
+  #   for i in $exist_id; do
+  #     if [ "$v" = "$i" ]; then
+  #       rdd=1
+  #       break
+  #     fi
+  #   done
+  #
+  #   if [ "$rdd" = "0" ]; then
+  #     exist_id="$exist_id $v"
+  #   fi
+  # fi
+  #
+  # if [ "$rdd" = "1" ];
+  # then
+  #   echo '[RDD]'
+  #   return
+  # fi
+
+
+
+
 }
 
 parse_json()
 {
+  # cos_id
+  pos=$(echo "$1" | grep -b -o 'cos_id' | cut -d: -f1)
+  if [ "$pos" != "" ]; then
+    new_id=$(get_value "$1")
+    # check if redundant
+    rdd=0
+    for i in $exist_id; do
+      if [ "$new_id" = "$i" ]; then
+        rdd=1
+        break
+      fi
+    done
+    if [ "$rdd" = "1" ];
+    then
+      echo '[RDD]'
+      return
+    else
+      exist_id="$exist_id $p"
+    fi
+    printf '%s\n' "$new_id"
+  fi
+
+  if [ "$rdd" = "1" ]; then
+    echo '[RDD]'
+    return
+  fi
+
   # cos_time
   pos=$(echo "$1" | grep -b -o 'cos_time' | cut -d: -f1)
   if [ "$pos" != "" ]; then
@@ -35,11 +111,11 @@ parse_json()
 # main ======
 raw_file='raw_timetable.json'
 prep_file='pre_classes.txt'
+exist_id=''
 
 # insert new line into .json
-cat "$raw_file" | sed 's/'{'/{\'$'\n/g' | sed 's/'}'/}\'$'\n/g' | sed 's/','/,\'$'\n/g'  > "$prep_file"
+cat "$1" | sed 's/'{'/{\'$'\n/g' | sed 's/'}'/}\'$'\n/g' | sed 's/','/,\'$'\n/g' | awk '/cos_id/{print $0} /cos_time/{print $0} /cos_ename/{print $0}' | sed 's/"//g' > "$prep_file"
 
 while read p; do
-    # echo $p
-    parse_json "$p"
+  get_value "$p"
 done < $prep_file
