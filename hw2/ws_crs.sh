@@ -15,7 +15,7 @@ fi
 ## ./data/cur_class.txt
 #  - change after "Add_class", default empty.
 if [ ! -f "./data/cur_class.txt" ]; then
-   cat > cur_class.txt
+   > cur_class.txt
 fi
 
 # variables
