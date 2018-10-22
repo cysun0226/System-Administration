@@ -96,6 +96,10 @@ fill_timetable()
 {
   # $1 row / $2 col / $3 name
   lc=$(expr ${#3} / $grid_width + 1)
+  u=$(get_3d_value timetable "_$row" "_$col" "_1")
+  if [ "$u" != "###############" ]; then
+    conflict=1
+  fi
 
   for i in $(seq $lc); do
     grid_row=''
@@ -155,6 +159,7 @@ time_code='A B C D E F G H I J K'
 ex_time_code='M N A B C D X E F G H Y I J K L'
 grid_width=14
 show_classroom=0
+conflict=0
 
 # declare array
 for r in $(seq 11); do
@@ -165,6 +170,13 @@ for r in $(seq 11); do
   done
 done
 
+for r in $(seq 11); do
+  for c in $(seq 5); do
+    eval "timetable_used_${r}_${c}=0"
+  done
+done
+
+
 # main =====
 if [ "$2" = "1" ]; then
   show_classroom=1
@@ -174,4 +186,9 @@ while read p; do
   parse_class "$p"
 done < $1
 
-print_table
+if [ "$conflict" != "0" ];
+then
+  echo "conflict"
+else
+  print_table
+fi
