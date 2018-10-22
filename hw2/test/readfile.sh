@@ -1,22 +1,27 @@
 #!/bin/bash
 filename='sample.txt'
-# echo Start
-# while read p; do
-#     echo $p
-# done < $filename
 
-# while IFS=\= read -r var; do
+
+
+while read p; do
+    vars+=("$p")
+    # echo $p
+done < $filename
+
+# while IFS=$'\n' read -r var; do
 #     vars+=($var)
 # done < $filename
 
-IFS=$'\n' read -d '' -r -a classes < $filename
+echo "${vars[2]}"
 
-for i in ${!classes[@]}
-do
-var+=${classes[$i]}
-done
-
-dialog --title "Classes" --textbox classes.txt 50 80
+# IFS=$'\n' read -d '' -r -a classes < $filename
+#
+# for i in ${!classes[@]}
+# do
+# var+=${classes[$i]}
+# done
+#
+# dialog --title "Classes" --textbox classes.txt 50 80
 
 # var=$(df -hT | awk '{print lines[@]}')
 

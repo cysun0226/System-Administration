@@ -1,7 +1,9 @@
-1GH4CD-SA214 - Calculus (I)
-1CD4GH-SC105 - Physics (I)
-5IJK-EC122 - Competitive Programming (II)
-6EFG-ED302 - Competitive Programming(III)
-2A-AB101 - Service Learning II
-2IJK-EC220,5CD-EC114 - Digital Circuit Lab.
-4IJK-EC122 - Computer System Administration
+0412#1GH4CD-SC206?Calculus (I)
+0514#1CD4GH-SC105?Physics (I)
+1163#3GH-AB101?Career Planning and Mentor of Hours
+1164#5IJK-EC122?Competitive Programming (II)
+1165#6EFG-ED302?Competitive Programming(III)
+1166#2EF5B-EC315?LabVIEW Programming Language
+1170#2A-AB101?Service Learning II
+1173#2G5CD-EC115?Introduction to Cryptography
+1180#4IJK-EC115?Network Planning and Management Practices

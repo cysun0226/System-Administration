@@ -52,7 +52,12 @@ add_class()
 {
   time_conflict=0
   filename='./data/cur_class.txt'
-  IFS=$'\n' read -d '' -r -a added_class < $filename
+  # IFS=$'\n' read -d '' -r -a added_class < $filename
+  while read p; do
+      added_class+=("$p")
+      # echo $p
+  done < $filename
+
   for i in ${!class[@]}
   do
   status='off'
@@ -115,12 +120,6 @@ init
 # display timetable
 while [ $response != 2 ]; do
   timetable=$(./print_table.out ./data/cur_class.txt $show_classroom $show_extra)
-  # if [ $show_classroom = 0 ]
-  #   then
-  #     timetable=$(./print_table.out ./data/cur_class.txt)
-  #   else
-  #     timetable=$(./print_table.out ./data/cur_class.txt show_classroom)
-  # fi
   dialog --no-collapse --title "Timetable" \
              --help-button --help-label "Exit" \
              --extra-button --extra-label "Option" \

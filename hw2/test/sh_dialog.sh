@@ -29,19 +29,24 @@ generate_list_item()
 }
 
 
-# add_class()
-# {
-#   usr_input=$(eval dialog --buildlist '"Add a class"' 30 100 20 "$(generate_list_item ./data/n_class.txt)" --output-fd 1)
-#   # cancel
-#   if [ "$usr_input" = "" ]; then
-#     return
-#   fi
-#   cur_class=$(sed 's@\\@@g' <<< $usr_input)
-#   eval 'for word in '$cur_class'; do echo $word; done' > ./data/ncur_class.txt
-# }
+add_class()
+{
+  USR_IPT="./data/temp.txt"
+  >$USR_IPT # create temp file
+  eval dialog --buildlist '"Add a class"' 30 100 20 "$(generate_list_item ./data/classes.txt)" 2>$USR_IPT
+
+  # cancel
+  if [ "$?" = "1" ]; then
+    echo "cancel"
+    return
+  fi
+
+  cur_class=$(sed 's@\\@@g' <<< $USR_IPT)
+  eval 'for word in '$cur_class'; do echo $word; done' > ./data/cur_class.txt
+}
 
 
 # main
 # generate_list_item ./data/classes.txt
-eval dialog --buildlist '"Add a class"' 30 100 20 "$(generate_list_item ./data/classes.txt)"
-# add_class
+# eval dialog --buildlist '"Add a class"' 30 100 20 "$(generate_list_item ./data/classes.txt)"
+add_class
