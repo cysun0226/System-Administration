@@ -211,7 +211,12 @@ parse_class()
     # time
     if echo "$c" | grep -q '[A-K]'; then
       row=$(get_time $c)
-      if_w=$(echo "$col" | grep '[1-5]')
+      if [ "$show_extra" != "1" ]; then
+        if_w=$(echo "$col" | grep '[1-5]')
+      else
+        if_w=$(echo "$col" | grep '[1-7]')
+      fi
+
       if [ "$if_w" != "" ]; then
         fill_timetable $row $col "$name"
       fi
