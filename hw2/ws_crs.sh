@@ -1,4 +1,23 @@
 #!/bin/sh
+
+##### initialize
+
+# create ./data/
+if [ ! -d "data" ]; then
+  mkdir data
+fi
+
+# timetable.json
+
+# classes.txt
+# - generate from timetable.json
+
+## ./data/cur_class.txt
+#  - change after "Add_class", default empty.
+if [ ! -f "./data/cur_class.txt" ]; then
+   cat > cur_class.txt
+fi
+
 # variables
 show_classroom=0
 show_extra=0
