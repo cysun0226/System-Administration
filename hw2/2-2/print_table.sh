@@ -214,13 +214,23 @@ fill_timetable()
 parse_class()
 {
   id=$(echo $1 | cut -d'#' -f1)
-  time=$(echo $1 | cut -d'#' -f2 | cut -d'?' -f1 | cut -d'-' -f1)
+  x_time=$(echo $1 | cut -d'#' -f2 | cut -d'?' -f1)
+  time_cnt=$(echo $x_time | grep -o '-' | wc -l)
+  time=''
+  for t in $(seq $time_cnt); do
+    time="$time$(echo $x_time | cut -d',' -f$t | cut -d'-' -f1)"
+    if [ "$t" = "1" ]; then
+      room="$(echo $x_time | cut -d',' -f$t | cut -d'-' -f2)"
+    else
+      room="$room, $(echo $x_time | cut -d',' -f$t | cut -d'-' -f2)"
+    fi
+  done
 
   if [ "$show_classroom" = "0" ];
   then
     name=$(echo $1 | cut -d'?' -f2)
   else
-    name=$(echo $1 | cut -d'#' -f2 | cut -d'?' -f1 | cut -d'-' -f2)
+    name="$room"
   fi
 
   for i in $(seq ${#time}); do
