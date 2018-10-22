@@ -79,6 +79,7 @@ generate_list_item()
 add_class()
 {
   # create empty temp file
+  time_conflict=0
   USR_IPT="./data/temp.txt"
   >$USR_IPT
 
@@ -90,8 +91,8 @@ add_class()
   fi
   cur_class=$(cat $USR_IPT | sed 's@\\@@g')
   eval 'for word in '$cur_class'; do echo $word; done' > ./data/temp.txt
-  add_result=$(./print_table.sh ./data/temp.txt $show_classroom)
-  if [ "$add_result" != "conflict" ];
+  add_result=$(./print_table.sh ./data/temp.txt $show_classroom $show_extra 1)
+  if [ "$add_result" = "pass" ];
   then
     eval 'for word in '$cur_class'; do echo $word; done' > ./data/cur_class.txt
   else
@@ -119,19 +120,19 @@ dialog --title "Check Courses Data" \
 
 # display timetable
 while [ $response != 2 ]; do
-  timetable=$(./print_table.sh ./data/cur_class.txt $show_classroom | sed 's/#/\ /g')
+  timetable=$(./print_table.sh ./data/cur_class.txt $show_classroom $show_extra 0 | sed 's/#/\ /g')
 
   dialog --no-collapse --title "Timetable" \
              --help-button --help-label "Exit" \
              --extra-button --extra-label "Option" \
-             --ok-label "Add Class" --msgbox "$timetable" 50 130
+             --ok-label "Add Class" --msgbox "$timetable" 50 140
 
   response=$?
   case $response in
     0) add_class
-    #   while [ $time_conflict = 1 ]; do
-    #     add_class
-    #   done
+      while [ $time_conflict = 1 ]; do
+        add_class
+      done
       ;;
     2) break
       ;;

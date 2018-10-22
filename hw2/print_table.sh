@@ -92,19 +92,78 @@ print_table()
   done
 }
 
+print_extra_table()
+{
+  print_bar $(expr $grid_width \* 7 + 32)
+  printf '   '
+  for d in $ex_weekday; do
+    printf '| '
+    printf '%s' $d
+    get_space $(expr $grid_width - 1)
+    if [ "$d" = 'Sun' ] ; then
+      printf '|\n'
+    fi
+  done
+  print_dbar $(expr $grid_width \* 7 + 32)
+
+  t_idx=0
+  for t in $ex_time_code; do
+    t_idx=$(expr $t_idx + 1)
+    # time row
+    printf ' %s' $t
+    for w in $(seq 7); do
+      printf ' | '
+      get_3d_value ex_timetable "_$t_idx" "_$w" _1
+    done
+    printf ' |\n'
+
+    # grid
+    for g in 2 3 4; do
+      printf '  '
+      for w in 1 2 3 4 5 6 7; do
+        printf ' | '
+        get_3d_value ex_timetable "_$t_idx" "_$w" "_$g"
+      done
+      printf ' |\n'
+    done
+    print_bar $(expr $grid_width \* 7 + 32)
+  done
+}
+
 fill_timetable()
 {
   # $1 row / $2 col / $3 name
-  lc=$(expr ${#3} / $grid_width + 1)
-  u=$(get_3d_value timetable "_$row" "_$col" "_1")
-  if [ "$u" != "###############" ]; then
-    conflict=1
+  # check_conflict
+  if [ "$show_extra" != "1" ]
+  then
+    u=$(get_3d_value timetable "_$row" "_$col" "_1")
+    if [ "$u" != "###############" ]; then
+      conflict=1
+    fi
+  else
+    u=$(get_3d_value ex_timetable "_$row" "_$col" "_1")
+    if [ "$u" != "############" ]; then
+      conflict=1
+    fi
   fi
+
+  if [ "$check_conflict" != "0" ]; then
+    if [ "$show_extra" != "1" ]; then
+      eval "timetable_${row}_${col}_1=0"
+    else
+      eval "ex_timetable_${row}_${col}_1=0"
+    fi
+    return
+  fi
+
+  # fill
+
+  lc=$(expr ${#3} / $grid_width + 1)
 
   for i in $(seq $lc); do
     grid_row=''
     # i*GRID_LEN
-    igl=$(expr $i \* $grid_width - $grid_width + 1 )
+    igl=$(expr $i \* $grid_width - $grid_width + $i )
     # (i+1)*GRID_LEN
     ipl=$(expr $i \* $grid_width )
     if [ ${#3} -gt $ipl ];
@@ -112,13 +171,22 @@ fill_timetable()
       grid_row=$(echo "$3" | cut -c $igl-$(expr $igl + $grid_width))
     else
       grid_row=$(echo "$3" | cut -c $igl-$(expr ${#3} + 1 ))
-      grid_row="$grid_row$(echo '###############' | cut -c 1-$(expr $ipl - ${#3} + 1))" # fill the row
     fi
-    eval "timetable_${row}_${col}_${i}=\"$grid_row\""
-    # echo "$grid_row"
-  done
-  # echo $(expr length "$1")
 
+    # fill the row
+    if [ "$grid_row" = "" ]; then
+      break;
+    fi
+    grid_row="$grid_row###############"
+    grid_row=$(echo $grid_row | cut -c 1-$(expr $grid_width + 1))
+
+    if [ "$show_extra" = "0" ];
+    then
+      eval "timetable_${row}_${col}_${i}=\"$grid_row\""
+    else
+      eval "ex_timetable_${row}_${col}_${i}=\"$grid_row\""
+    fi
+  done
 }
 
 parse_class()
@@ -159,36 +227,62 @@ time_code='A B C D E F G H I J K'
 ex_time_code='M N A B C D X E F G H Y I J K L'
 grid_width=14
 show_classroom=0
+show_extra=0
 conflict=0
+check_conflict=0
 
 # declare array
-for r in $(seq 11); do
-  for c in $(seq 5); do
-    for l in $(seq 4); do
-      eval "timetable_${r}_${c}_${l}='###############'"
+init()
+{
+  if [ "$show_extra" = "0" ];
+  then
+    for r in $(seq 11); do
+      for c in $(seq 5); do
+        for l in $(seq 4); do
+          eval "timetable_${r}_${c}_${l}='###############'"
+        done
+      done
     done
-  done
-done
-
-for r in $(seq 11); do
-  for c in $(seq 5); do
-    eval "timetable_used_${r}_${c}=0"
-  done
-done
-
+  else
+    grid_width=11
+    for r in $(seq 16); do
+      for c in $(seq 7); do
+        for l in $(seq 4); do
+          eval "ex_timetable_${r}_${c}_${l}='############'"
+        done
+      done
+    done
+  fi
+}
 
 # main =====
-if [ "$2" = "1" ]; then
-  show_classroom=1
-fi
+# $1: cur_class.txt
+# $2: show_classroom
+# $3: show_extra
+# $4: check_conflict
+
+show_classroom="$2"
+show_extra="$3"
+check_conflict="$4"
+init
 
 while read p; do
   parse_class "$p"
 done < $1
 
-if [ "$conflict" != "0" ];
+if [ "$check_conflict" != "0" ];
 then
-  echo "conflict"
+  if [ "$conflict" != "0" ];
+  then
+    echo "conflict"
+  else
+    echo "pass"
+  fi
 else
-  print_table
+  if [ "$show_extra" != "1" ];
+  then
+    print_table
+  else
+    print_extra_table
+  fi
 fi
