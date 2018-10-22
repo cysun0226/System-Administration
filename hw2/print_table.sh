@@ -120,12 +120,11 @@ fill_timetable()
 parse_class()
 {
   id=$(echo $1 | cut -d'#' -f1)
-  time=$(echo $1 | cut -d'#' -f2 | cut -d'?' -f1)
+  time=$(echo $1 | cut -d'#' -f2 | cut -d'?' -f1 | cut -d'-' -f1)
   name=$(echo $1 | cut -d'?' -f2)
 
   for i in $(seq ${#time}); do
     c=$(echo "$time" | cut -c $i-$i)
-    # echo $c
     # weekday
     if_w=$(echo "$c" | grep '[1-7]')
     if [ "$if_w" != "" ]; then
