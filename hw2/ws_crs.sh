@@ -1,4 +1,4 @@
-
+#!/bin/sh
 # variables
 show_classroom=0
 show_extra=0
@@ -31,11 +31,29 @@ handle_option()
 
 generate_list_item()
 {
+  # added_class
+  added_id=''
+  while read a; do
+    added_id="$added_id $(echo $a | cut -d'#' -f1)"
+  done < ./data/cur_class.txt
+
   while read p; do
+    id=$(echo $p | cut -d'#' -f1)
+    time=$(echo $p | cut -d'#' -f2 | cut -d'?' -f1)
+    name=$(echo $p | cut -d'?' -f2)
+
+    on_off='off'
+
+    for a in $added_id; do
+      if [ "$id" = "$a" ]; then
+        on_off='on'
+        break
+      fi
+    done
+
     printf '"%s" ' "$p"
-    t=$(echo "$p" | sed 's/?/\ -\ /g')
-    printf '"%s" ' "$t"
-    printf '"%s" ' "off"
+    printf '"%s - %s" ' "$time" "$name"
+    printf '"%s" ' "$on_off"
   done < $1
 }
 
@@ -66,25 +84,28 @@ dialog --title "Check Courses Data" \
    255) echo "[ESC] key pressed.";;
  esac
 
-timetable=$(./print_table.sh ./data/cur_class.txt | sed 's/#/\ /g')
+# display timetable
+while [ $response != 2 ]; do
+  timetable=$(./print_table.sh ./data/cur_class.txt $show_classroom | sed 's/#/\ /g')
 
-dialog --no-collapse --title "Timetable" \
-           --help-button --help-label "Exit" \
-           --extra-button --extra-label "Option" \
-           --ok-label "Add Class" --msgbox "$timetable" 50 130
+  dialog --no-collapse --title "Timetable" \
+             --help-button --help-label "Exit" \
+             --extra-button --extra-label "Option" \
+             --ok-label "Add Class" --msgbox "$timetable" 50 130
 
-response=$?
-case $response in
-  0) add_class
-  #   while [ $time_conflict = 1 ]; do
-  #     add_class
-  #   done
-    ;;
-  2) break
-    ;;
-  3) echo "Option"
-    opt=$(dialog --title "Option" --menu "Choose one" 12 35 5 \
-    op1 "$opt1_str" op2 "$opt2_str" --output-fd 1)
-    handle_option $opt
-    ;;
-esac
+  response=$?
+  case $response in
+    0) add_class
+    #   while [ $time_conflict = 1 ]; do
+    #     add_class
+    #   done
+      ;;
+    2) break
+      ;;
+    3) echo "Option"
+      opt=$(dialog --title "Option" --menu "Choose one" 12 35 5 \
+      op1 "$opt1_str" op2 "$opt2_str" --output-fd 1)
+      handle_option $opt
+      ;;
+  esac
+done

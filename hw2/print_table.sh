@@ -121,7 +121,13 @@ parse_class()
 {
   id=$(echo $1 | cut -d'#' -f1)
   time=$(echo $1 | cut -d'#' -f2 | cut -d'?' -f1 | cut -d'-' -f1)
-  name=$(echo $1 | cut -d'?' -f2)
+
+  if [ "$show_classroom" = "0" ];
+  then
+    name=$(echo $1 | cut -d'?' -f2)
+  else
+    name=$(echo $1 | cut -d'#' -f2 | cut -d'?' -f1 | cut -d'-' -f2)
+  fi
 
   for i in $(seq ${#time}); do
     c=$(echo "$time" | cut -c $i-$i)
@@ -148,6 +154,7 @@ ex_weekday='Mon Tue Wed Thu Fri Sat Sun'
 time_code='A B C D E F G H I J K'
 ex_time_code='M N A B C D X E F G H Y I J K L'
 grid_width=14
+show_classroom=0
 
 # declare array
 for r in $(seq 11); do
@@ -159,6 +166,9 @@ for r in $(seq 11); do
 done
 
 # main =====
+if [ "$2" = "1" ]; then
+  show_classroom=1
+fi
 
 while read p; do
   parse_class "$p"
