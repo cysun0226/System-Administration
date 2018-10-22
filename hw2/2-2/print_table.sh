@@ -54,6 +54,28 @@ get_time()
   esac
 }
 
+get_ex_time()
+{
+  case $1 in
+    M) echo 1 ;;
+    N) echo 2 ;;
+    A) echo 3 ;;
+    B) echo 4 ;;
+    C) echo 5 ;;
+    D) echo 6 ;;
+    X) echo 7 ;;
+    E) echo 8 ;;
+    F) echo 9 ;;
+    G) echo 10 ;;
+    H) echo 11 ;;
+    Y) echo 12 ;;
+    I) echo 13 ;;
+    J) echo 14 ;;
+    K) echo 15 ;;
+    L) echo 16 ;;
+  esac
+}
+
 print_table()
 {
   print_bar $(expr $grid_width \* 5 + 24)
@@ -210,7 +232,13 @@ parse_class()
     fi
     # time
     if echo "$c" | grep -q '[A-K]'; then
-      row=$(get_time $c)
+      if [ "$show_extra" != "1" ];
+      then
+        row=$(get_time $c)
+      else
+        row=$(get_ex_time $c)
+      fi
+
       if [ "$show_extra" != "1" ]; then
         if_w=$(echo "$col" | grep '[1-5]')
       else

@@ -215,7 +215,7 @@ while [ $response != 2 ]; do
     2) exit 0
       ;;
     3) echo "Option"
-      opt=$(dialog --title "Option" --menu "Choose one" 12 35 5 \
+      opt=$(dialog --title "Option" --menu "Timetable Display Options" 12 35 5 \
       op1 "$opt1_str" op2 "$opt2_str" --output-fd 1)
       handle_option $opt
       ;;
