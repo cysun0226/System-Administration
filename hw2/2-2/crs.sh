@@ -7,24 +7,72 @@ if [ ! -d "data" ]; then
   mkdir data
 fi
 
-# timetable.json
-
-# classes.txt
-# - generate from timetable.json
-
-## ./data/cur_class.txt
-#  - change after "Add_class", default empty.
-if [ ! -f "./data/cur_class.txt" ]; then
-   > cur_class.txt
-fi
-
 # variables
 show_classroom=0
 show_extra=0
 time_conflict=0
 opt1_str='Show Classroom'
 opt2_str='Show Extra Column'
+exist_id=''
 
+##### download_data
+get_json_value()
+{
+  v=$(echo $1 | cut -d':' -f2 | sed 's/.$//')
+
+  cnt=$(expr $cnt + 1 )
+  case $cnt in
+    1) #id
+        # check if redundant
+        rdd=0
+          for i in $exist_id; do
+            if [ "$v" = "$i" ]; then
+              rdd=1
+              break
+            fi
+          done
+        if [ "$rdd" = "0" ]; then
+           exist_id="$exist_id $v"
+           printf '%s#' "$v"
+        fi
+    ;;
+    2) # time
+      if [ "$rdd" = "1" ]; then
+        return
+      fi
+      printf '%s?' "$v"
+    ;;
+    3) #name
+      cnt=0
+      if [ "$rdd" = "1" ]; then
+        return
+      fi
+      printf '%s\n' "$v"
+    ;;
+  esac
+}
+
+parse_json()
+{
+  cnt=0
+  while read p; do
+    get_json_value "$p"
+  done < $1
+}
+
+download_data()
+{
+  raw_file='./data/raw_data.json'
+  prep_file='./data/pre_classes.txt'
+  curl "$1" --data " $2" > $raw_file
+  # insert new line into .json
+  cat "$raw_file" | sed 's/'{'/{\'$'\n/g' | sed 's/'}'/}\'$'\n/g' | sed 's/'\",'/,\'$'\n/g' | awk '/cos_id/{print $0} /cos_time/{print $0} /cos_ename/{print $0}' | sed 's/"//g' > "$prep_file"
+  parse_json "$prep_file" > ./data/classes.txt
+  rm $raw_file
+  rm $prep_file
+}
+
+##### CRS function
 handle_option()
 {
   ipt=$1
@@ -106,16 +154,46 @@ add_class()
 
 ### main ----------------------
 
-dialog --title "Check Courses Data" \
---defaultno --yesno \
-"Welcome to CRS.\n\nCurrent courses: \n * CS107-fall\n\nDownload new courses?"\
+# check if courses data exists
+if [ ! -f "./data/classes.txt" ]; then
+  dialog --title "CRS" \
+  --defaultno --yesno \
+  "Welcome to CRS.\n\nNo available courses data.\n\nDownload default courses?\
+  \n\n * [YES] Download default courses (CS107-fall)\n\n * [NO]  Download from input URL"\
+   20 50
+
+   response=$?
+   case $response in
+     0) dialog --title "Download Courses Data" --msgbox "Download CS107-fall." 10 30
+        download_data 'https://timetable.nctu.edu.tw/?r=main/get_cos_list' \
+        'm_acy=107&m_sem=1&m_degree=3&m_dep_id=17&m_group=**&m_grade=**&m_class=**&m_option=**&m_crs name=**&m_teaname=**&m_cos_id=**&m_cos_code=**&m_crstime=**&m_crsoutline=**&m_costype=**'
+        dialog --title "Download Courses Data" --msgbox "Finish Downloading." 10 30
+     ;;
+     1) dialog --title "Download Courses Data" --inputbox "Please input URL:" 20 100 2>./data/input.txt
+        url=$(cat ./data/input.txt)
+        dialog --title "Download Courses Data" --inputbox "Please input data format:" 20 100 2>./data/input.txt
+        data_format=$(cat ./data/input.txt)
+        download_data "$url" "$data_format"
+     ;;
+     255) exit 0;;
+   esac
+fi
+
+# Data Exists
+dialog --title "CRS" --yes-label 'OK' --no-label 'Exit' --yesno \
+"Welcome to CRS.\n\nCurrent courses: \n * CS107-fall\n\nPress [OK] to start CRS."\
  20 50
+
+# Check if current_class exists
+if [ ! -f "./data/cur_class.txt" ]; then
+  > ./data/cur_class.txt
+fi
 
  response=$?
  case $response in
-   0) echo "Please input curl URL:";;
-   1) echo "generate table...";;
-   255) echo "[ESC] key pressed.";;
+   0) echo "generate table...";;
+   1) exit 0;;
+   255) exit 0;;
  esac
 
 # display timetable
@@ -134,7 +212,7 @@ while [ $response != 2 ]; do
         add_class
       done
       ;;
-    2) break
+    2) exit 0
       ;;
     3) echo "Option"
       opt=$(dialog --title "Option" --menu "Choose one" 12 35 5 \
