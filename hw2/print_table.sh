@@ -119,22 +119,9 @@ fill_timetable()
 
 parse_class()
 {
-  q_pos=$(echo "$1" | awk -F? '{print length($1)+1}')
-  q_pos=$(expr $q_pos + 1)
-  name=$(echo "$1" | cut -c $q_pos-${#1})
-  q_pos=$(expr $q_pos - 2)
-  time=$(echo "$1" | cut -c 1-$q_pos)
-
-  # classroom
-  d_pos=$(echo $time | awk -F- '{print length($1)+1}')
-  d_pos=$(expr $d_pos + 1)
-  room=$(echo "$time" | cut -c $d_pos-${#time})
-  d_pos=$(expr $d_pos - 2)
-  time=$(echo "$time" | cut -c 1-$d_pos)
-
-  # echo "$name"
-  # echo "$time"
-  # echo "$room"
+  id=$(echo $1 | cut -d'#' -f1)
+  time=$(echo $1 | cut -d'#' -f2 | cut -d'?' -f1)
+  name=$(echo $1 | cut -d'?' -f2)
 
   for i in $(seq ${#time}); do
     c=$(echo "$time" | cut -c $i-$i)
@@ -154,9 +141,6 @@ parse_class()
     fi
 
   done
-
-
-
 }
 
 # declare
