@@ -14,6 +14,7 @@ time_conflict=0
 opt1_str='Show Classroom'
 opt2_str='Show Extra Column'
 exist_id=''
+update=1
 
 ##### download_data
 get_json_value()
@@ -73,6 +74,18 @@ download_data()
 }
 
 ##### CRS function
+search_courses()
+{
+  target=$1
+  while read p; do
+    if [ "$(echo "$p" | grep "$target")" != "" ]; then
+      time=$(echo $p | cut -d'#' -f2 | cut -d'?' -f1)
+      name=$(echo $p | cut -d'?' -f2)
+      printf '%s - %s\n' "$time" "$name"
+    fi
+  done < ./data/classes.txt
+}
+
 handle_option()
 {
   ipt=$1
@@ -93,7 +106,16 @@ handle_option()
          opt2_str='Hide Extra Column'
        fi
        ;;
+    op3) # search courses
+        > ./data/input.txt
+        dialog --title "Search courses" --inputbox "Target substring:" 20 100 2>./data/input.txt
+        ipt=$(cat ./data/input.txt)
+        dialog --title "Courses contain [$ipt]" --msgbox "$(search_courses $ipt)" 50 140
+        rm ./data/input.txt
+        update=0
+       ;;
   esac
+  echo "generate table..."
 }
 
 generate_list_item()
@@ -135,6 +157,7 @@ add_class()
   # cancel
   if [ "$?" = "1" ]; then
     rm ./data/temp.txt
+    update=0
     return
   fi
   cur_class=$(cat $USR_IPT | sed 's@\\@@g')
@@ -181,7 +204,7 @@ fi
 
 # Data Exists
 dialog --title "CRS" --yes-label 'OK' --no-label 'Exit' --yesno \
-"Welcome to CRS.\n\nCurrent courses: \n * CS107-fall\n\nPress [OK] to start CRS."\
+"Welcome to CRS.\n\nFind available courses data.\n\nPress [OK] to start CRS."\
  20 50
 
 # Check if current_class exists
@@ -198,8 +221,12 @@ fi
 
 # display timetable
 while [ $response != 2 ]; do
-  timetable=$(./print_table.sh ./data/cur_class.txt $show_classroom $show_extra 0 | sed 's/#/\ /g')
-
+  if [ $update = 1 ]; then
+    ./print_table.sh ./data/cur_class.txt $show_classroom $show_extra 0 | sed 's/#/\ /g' > ./data/table.txt
+  fi
+  timetable=$(cat ./data/table.txt)
+  update=1
+  # timetable=$(./print_table.sh ./data/cur_class.txt $show_classroom $show_extra 0 | sed 's/#/\ /g')
   dialog --no-collapse --title "Timetable" \
              --help-button --help-label "Exit" \
              --extra-button --extra-label "Option" \
@@ -215,8 +242,8 @@ while [ $response != 2 ]; do
     2) exit 0
       ;;
     3) echo "Option"
-      opt=$(dialog --title "Option" --menu "Timetable Display Options" 12 35 5 \
-      op1 "$opt1_str" op2 "$opt2_str" --output-fd 1)
+      opt=$(dialog --title "Option" --menu "" 12 35 5 \
+      op1 "$opt1_str" op2 "$opt2_str" op3 "Search Courses" --output-fd 1)
       handle_option $opt
       ;;
   esac
