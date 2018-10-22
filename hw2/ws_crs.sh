@@ -59,13 +59,27 @@ generate_list_item()
 
 add_class()
 {
-  usr_input=$(eval dialog --buildlist '"Add a class"' 30 100 20 "$(generate_list_item ./data/classes.txt)" --output-fd 1)
+  # create empty temp file
+  USR_IPT="./data/temp.txt"
+  >$USR_IPT
+
+  eval dialog --buildlist '"Add a class"' 30 110 20 "$(generate_list_item ./data/classes.txt)" 2>$USR_IPT
   # cancel
-  if [ "$usr_input" = "" ]; then
+  if [ "$?" = "1" ]; then
+    rm ./data/temp.txt
     return
   fi
-  cur_class=$(echo "$usr_input" | sed 's@\\@@g')
-  eval 'for word in '$cur_class'; do echo $word; done' > ./data/cur_class.txt
+  cur_class=$(cat $USR_IPT | sed 's@\\@@g')
+  eval 'for word in '$cur_class'; do echo $word; done' > ./data/temp.txt
+  add_result=$(./print_table.sh ./data/temp.txt $show_classroom)
+  if [ "$add_result" != "conflict" ];
+  then
+    eval 'for word in '$cur_class'; do echo $word; done' > ./data/cur_class.txt
+  else
+    dialog --title "Warning" --msgbox "Time conflict!" 10 20
+    time_conflict=1
+  fi
+  rm ./data/temp.txt
 }
 
 
