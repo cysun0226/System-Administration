@@ -127,21 +127,9 @@ check_conflict()
   done
 }
 
-search_courses()
-{
-  grep "$1" ./data/classes.txt
-  # target=$1
-  # while read p; do
-  #   if [ "$(echo "$p" | grep "$target")" != "" ]; then
-  #     time=$(echo $p | cut -d'#' -f2 | cut -d'?' -f1)
-  #     name=$(echo $p | cut -d'?' -f2)
-  #     printf '%s - %s\n' "$time" "$name"
-  #   fi
-  # done < ./data/classes.txt
-}
-
 get_free_time_courses()
 {
+  > ./data/available.txt
   while read a; do
     x_time=$(echo $a | cut -d'#' -f2)
     time_cnt=$(echo $x_time | grep -o '-' | wc -l)
@@ -168,10 +156,7 @@ get_free_time_courses()
       fi
     done
     if [ "$available" = "1" ]; then
-      id=$(echo $a | cut -d'#' -f1)
-      time=$(echo $a | cut -d'#' -f2)
-      name=$(echo $a | cut -d'#' -f3)
-      printf '[%s] %s - %s\n' "$id" "$time" "$name"
+      printf '%s\n' "$a" >> $2
     fi
   done < $1
 }
@@ -199,8 +184,13 @@ handle_option()
     op3) # search courses
         > ./data/input.txt
         dialog --title "Search courses" --inputbox "Target substring:" 20 100 2>./data/input.txt
+        if [ "$response" = "1" ]; then
+          rm ./data/input.txt
+          update=0
+          return
+        fi
         ipt=$(cat ./data/input.txt)
-        add_class $ipt
+        add_class s $ipt n
         rm ./data/input.txt
        ;;
     op4) # search free time courses
@@ -208,9 +198,12 @@ handle_option()
         check_conflict $(get_total_time ./data/cur_class.txt)
         time_conflict=0
         printf 'searching...'
-        dialog --title "Time Available Courses" \
-        --msgbox "$(get_free_time_courses ./data/classes.txt)" 50 140
-        update=0
+        get_free_time_courses ./data/classes.txt ./data/available.txt
+        add_class n n f
+        rm ./data/available.txt
+        # dialog --title "README" --textbox ./data/available.txt  50 100
+        # dialog --title "Time Available Courses" \
+        # --msgbox "$(get_free_time_courses ./data/classes.txt)" 50 140
       ;;
   esac
   printf "generate table..."
@@ -218,7 +211,9 @@ handle_option()
 
 add_class()
 {
-  # $1 = target
+  # $1 = basic
+  # $2 = target
+  # $3 = free time
 
   # create empty temp file
   time_conflict=0
@@ -237,11 +232,17 @@ add_class()
     response=$?
   else
     >./data/tmp2.txt
-    off_list_item=$(grep $1 ./data/classes.txt | awk -F# '{printf "%s?%s - %s?off\n",$0,$2,$3}' | sed 's/^/"/' | sed 's/$/"/' | sed 's/?/" "/g')
-    eval dialog --buildlist '"Courses contain [$1]"' 30 110 20 $off_list_item 2>./data/tmp2.txt
-    response=$?
+    if [ "$3" != "f" ]; then
+      off_list_item=$(grep $2 ./data/classes.txt | awk -F# '{printf "%s?%s - %s?off\n",$0,$2,$3}' | sed 's/^/"/' | sed 's/$/"/' | sed 's/?/" "/g')
+      eval dialog --buildlist '"Courses contain [$1]"' 30 110 20 $off_list_item 2>./data/tmp2.txt
+      response=$?
+    else
+      off_list_item=$(cat ./data/available.txt | awk -F# '{printf "%s?%s - %s?off\n",$0,$2,$3}' | sed 's/^/"/' | sed 's/$/"/' | sed 's/?/" "/g')
+      eval dialog --buildlist '"Course for free time"' 30 110 20 $off_list_item 2>./data/tmp2.txt
+      response=$?
+    fi
     echo "" >> ./data/tmp2.txt
-    cat ./data/tmp2.txt | sed 's/"//' | tr -d '"' > $USR_IPT
+    cat ./data/tmp2.txt | sed 's/" /\'$'\n/g' | tr -d '"' > $USR_IPT
     cat $USR_IPT > ./data/tmp2.txt
     cat ./data/tmp2.txt ./data/cur_class.txt | sed 's/^/"/' | sed 's/$/"/' > $USR_IPT
     rm ./data/tmp2.txt
@@ -255,8 +256,10 @@ add_class()
   cur_class=$(cat $USR_IPT | sed 's@\\@@g')
   eval 'for word in '$cur_class'; do echo $word; done' > ./data/temp.txt
   # check conflict
-  clean_use_table
-  check_conflict $(get_total_time ./data/temp.txt)
+  if [ "$cur_class" != "" ]; then
+    clean_use_table
+    check_conflict $(get_total_time ./data/temp.txt)
+  fi
   # add_result=$(./print_table.sh ./data/temp.txt $show_classroom $show_extra 1)
   # if [ "$add_result" = "pass" ];
   if [ "$time_conflict" = "0" ];
@@ -317,7 +320,7 @@ fi
 
  response=$?
  case $response in
-   0) printf "generate table...";;
+   0) ;;
    1) exit 0;;
    255) exit 0;;
  esac
@@ -337,9 +340,9 @@ while [ $response != 2 ]; do
 
   response=$?
   case $response in
-    0) add_class 'all'
+    0) add_class 'all' 'n' 'n'
       while [ $time_conflict = 1 ]; do
-        add_class 'all'
+        add_class 'all' 'n' 'n'
       done
       ;;
     2) exit 0
