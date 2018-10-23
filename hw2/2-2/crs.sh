@@ -214,7 +214,7 @@ handle_option()
         --msgbox "$(get_free_time_courses ./data/classes.txt)" 50 140
       ;;
   esac
-  echo "generate table..."
+  printf "generate table..."
 }
 
 generate_list_item()
@@ -316,7 +316,7 @@ fi
 
  response=$?
  case $response in
-   0) echo "generate table...";;
+   0) printf "generate table...";;
    1) exit 0;;
    255) exit 0;;
  esac
