@@ -15,6 +15,7 @@ opt1_str='Show Classroom'
 opt2_str='Show Extra Column'
 exist_id=''
 update=1
+total_time=''
 
 ##### download_data
 get_json_value()
@@ -74,6 +75,57 @@ download_data()
 }
 
 ##### CRS function
+clean_use_table()
+{
+  for d in 1 2 3 4 5 6 7; do
+    for t in M N A B C D X E F G H Y I J K L; do
+      eval "used_${d}_${t}=0"
+    done
+  done
+}
+
+get_2d_arr()
+{
+  id=$1$2$3
+  eval value="\$$id"
+  printf '%s' "$value"
+}
+
+get_total_time()
+{
+  total_time=''
+  while read a; do
+    x_time=$(echo $a | cut -d'#' -f2 | cut -d'?' -f1)
+    time_cnt=$(echo $x_time | grep -o '-' | wc -l)
+    time=''
+    for t in $(seq $time_cnt); do
+      time="$time$(echo $x_time | cut -d',' -f$t | cut -d'-' -f1)"
+    done
+    total_time="$total_time$time"
+  done < $1
+}
+
+check_conflict()
+{
+  for i in $(seq ${#total_time}); do
+    c=$(echo "$total_time" | cut -c $i-$i)
+    if_w=$(echo "$c" | grep '[1-7]')
+    # weekday
+    if [ "$if_w" != "" ];
+    then
+      day=$c
+    else
+      # time
+      t=$c
+      if_use=$(get_2d_arr used "_$day" "_$t")
+      if [ "$if_use" != "0" ]; then
+        time_conflict=1
+      fi
+      eval "used_${day}_$t=1"
+    fi
+  done
+}
+
 search_courses()
 {
   target=$1
@@ -162,13 +214,17 @@ add_class()
   fi
   cur_class=$(cat $USR_IPT | sed 's@\\@@g')
   eval 'for word in '$cur_class'; do echo $word; done' > ./data/temp.txt
-  add_result=$(./print_table.sh ./data/temp.txt $show_classroom $show_extra 1)
-  if [ "$add_result" = "pass" ];
+  # check conflict
+  clean_use_table
+  get_total_time ./data/temp.txt
+  check_conflict
+  # add_result=$(./print_table.sh ./data/temp.txt $show_classroom $show_extra 1)
+  # if [ "$add_result" = "pass" ];
+  if [ "$time_conflict" = "0" ];
   then
     eval 'for word in '$cur_class'; do echo $word; done' > ./data/cur_class.txt
   else
     dialog --title "Warning" --msgbox "Time conflict!" 10 20
-    time_conflict=1
   fi
   rm ./data/temp.txt
 }
