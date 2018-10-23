@@ -47,7 +47,6 @@ add_class()
 
 find_total_time()
 {
-  added_id=''
   while read a; do
     echo $a
     x_time=$(echo $a | cut -d'#' -f2 | cut -d'?' -f1)
@@ -57,7 +56,7 @@ find_total_time()
       time="$time$(echo $x_time | cut -d',' -f$t | cut -d'-' -f1)"
     done
     total_time="$total_time$time"
-  done < ./data/cur_class.txt
+  done < $1
 }
 
 check_conflict()
