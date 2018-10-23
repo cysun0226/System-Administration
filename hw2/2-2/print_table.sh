@@ -236,7 +236,7 @@ fill_timetable()
 parse_class()
 {
   id=$(echo $1 | cut -d'#' -f1)
-  x_time=$(echo $1 | cut -d'#' -f2 | cut -d'?' -f1)
+  x_time=$(echo $1 | cut -d'#' -f2)
   time_cnt=$(echo $x_time | grep -o '-' | wc -l)
   time=''
   for t in $(seq $time_cnt); do
@@ -250,7 +250,7 @@ parse_class()
 
   if [ "$show_classroom" = "0" ];
   then
-    name=$(echo $1 | cut -d'?' -f2)
+    name=$(echo $1 | cut -d'#' -f3)
   else
     name="$room"
   fi
