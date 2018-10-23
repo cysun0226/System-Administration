@@ -62,41 +62,42 @@ find_total_time()
 
 check_conflict()
 {
-  # $1 = total_time
-  Mon_t=''
-  Tue_t=''
-  Wed_t=''
-  Thu_t=''
-  Fri_t=''
-  Sat_t=''
-  Sun_t=''
-
   for i in $(seq ${#total_time}); do
     c=$(echo "$total_time" | cut -c $i-$i)
-    case $c in
-      1) wd='Mon_t'
-         echo $Mon_t | grep -o $c
-      ;;
-      2) wd='Tue_t'
-      ;;
-      3) wd='Wed_t'
-      ;;
-      4) wd='Thu_t'
-      ;;
-      5) wd='Fri_t'
-      ;;
-      6) wd='Sat_t'
-      ;;
-      7) wd='Sun_t'
-      ;;
-      *) tmp=$(eval echo "\$$wd")
-         eval $wd="$tmp$c"
-      ;;
-    esac
+    if_w=$(echo "$c" | grep '[1-7]')
+    # weekday
+    if [ "$if_w" != "" ];
+    then
+      day=$c
+    else
+      # time
+      t=$c
+      if_use=$(get_2d_value used "_$day" "_$t")
+      if [ "$if_use" != "0" ]; then
+        conflict=1
+      fi
+      eval "used_${day}_$t=1"
+    fi
   done
-
-  echo "$Mon_t"
 }
+
+# init array
+clean_usage()
+{
+  for d in 1 2 3 4 5 6 7; do
+    for t in M N A B C D X E F G H Y I J K L; do
+      eval "used_${d}_${t}=0"
+    done
+  done
+}
+
+get_2d_value()
+{
+  id=$1$2$3
+  eval value="\$$id"
+  printf '%s' "$value"
+}
+
 
 # main
 # generate_list_item ./data/classes.txt
@@ -105,5 +106,9 @@ total_time=''
 conflict=0
 find_total_time
 echo "$total_time"
+clean_usage
 check_conflict
+if [ "$conflict" != "0" ]; then
+  echo "conflict"
+fi
 # add_class
