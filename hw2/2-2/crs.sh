@@ -278,7 +278,7 @@ add_class()
       ;;
     esac
   else
-    dialog --title "Warning" --msgbox "Time conflict!" 10 20
+    dialog --title "Warning" --msgbox "Time conflict!" 20 10
   fi
   rm ./data/temp.txt
 }
