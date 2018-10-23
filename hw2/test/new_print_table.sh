@@ -84,7 +84,7 @@ print_extra_table()
   for t in $ex_time_code; do
     # time row
     printf ' %s' $t
-    for w in $(seq 7); do
+    for w in 1 2 3 4 5 6 7; do
       printf ' | '
       get_3d_value timetable "_$w" "_$t" _1
     done
