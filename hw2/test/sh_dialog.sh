@@ -61,8 +61,8 @@ find_total_time()
 
 check_conflict()
 {
-  for i in $(seq ${#total_time}); do
-    c=$(echo "$total_time" | cut -c $i-$i)
+  time_seq=$(echo "$total_time" | fold -w1 | paste -sd' ' -)
+  for c in $time_seq; do
     if_w=$(echo "$c" | grep '[1-7]')
     # weekday
     if [ "$if_w" != "" ];
@@ -97,17 +97,48 @@ get_2d_value()
   printf '%s' "$value"
 }
 
+get_free_time_courses()
+{
+  while read a; do
+    x_time=$(echo $a | cut -d'#' -f2 | cut -d'?' -f1)
+    time_cnt=$(echo $x_time | grep -o '-' | wc -l)
+    time=''
+    for t in $(seq $time_cnt); do
+      time="$time$(echo $x_time | cut -d',' -f$t | cut -d'-' -f1)"
+    done
+
+    time_seq=$(echo "$time" | fold -w1 | paste -sd' ' -)
+    available=1
+    for c in $time_seq; do
+      if_w=$(echo "$c" | grep '[1-7]')
+      # weekday
+      if [ "$if_w" != "" ];
+      then
+        day=$c
+      else
+        # time
+        t=$c
+        if_use=$(get_2d_value used "_$day" "_$t")
+        if [ "$if_use" != "0" ]; then
+          available=0
+        fi
+      fi
+    done
+    if [ "$available" = "1" ]; then
+      echo $a
+    fi
+  done < $1
+}
 
 # main
 # generate_list_item ./data/classes.txt
 # eval dialog --buildlist '"Add a class"' 30 100 20 "$(generate_list_item ./data/classes.txt)"
 total_time=''
 conflict=0
-find_total_time
+find_total_time ./data/cur_class.txt
 echo "$total_time"
 clean_usage
 check_conflict
-if [ "$conflict" != "0" ]; then
-  echo "conflict"
-fi
+echo "\n\n ## free time \n\n"
+get_free_time_courses ./data/classes.txt
 # add_class
