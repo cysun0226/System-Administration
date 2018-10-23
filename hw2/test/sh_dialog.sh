@@ -33,7 +33,8 @@ add_class()
 {
   USR_IPT="./data/temp.txt"
   >$USR_IPT # create temp file
-  eval dialog --buildlist '"Add a class"' 30 100 20 "$(generate_list_item ./data/classes.txt)" 2>$USR_IPT
+  list_item=$(grep -v -f ./data/cur_class.txt ./data/classes.txt | awk -F# '{printf "%s?%s - %s?off\n",$0,$2,$3}' | sed 's/^/"/' | sed 's/$/"/' | sed 's/?/" "/g')
+  eval dialog --buildlist '"Add a class"' 30 100 20 $list_item 2>$USR_IPT
 
   # cancel
   if [ "$?" = "1" ]; then
@@ -130,15 +131,33 @@ get_free_time_courses()
   done < $1
 }
 
+search_courses()
+{
+  target=$2
+  while read p; do
+    # echo "$p"
+    if [ "$(echo "$p" | grep "$target")" != "" ]; then
+      time=$(echo $p | cut -d'#' -f2 | cut -d'?' -f1)
+      name=$(echo $p | cut -d'?' -f2)
+      printf '"%s" ' "$p"
+      printf '"%s - %s" ' "$time" "$name"
+    fi
+  done < $1
+}
+
 # main
 # generate_list_item ./data/classes.txt
 # eval dialog --buildlist '"Add a class"' 30 100 20 "$(generate_list_item ./data/classes.txt)"
-total_time=''
-conflict=0
-find_total_time ./data/cur_class.txt
-echo "$total_time"
-clean_usage
-check_conflict
-echo "\n\n ## free time \n\n"
-get_free_time_courses ./data/classes.txt
-# add_class
+# total_time=''
+# conflict=0
+# find_total_time ./data/cur_class.txt
+# echo "$total_time"
+# clean_usage
+# check_conflict
+# echo "\n\n ## free time \n\n"
+# get_free_time_courses ./data/classes.txt
+add_class
+# search_courses ./data/classes.txt AB
+ipt=$(eval dialog --backtitle "Checklist" --checklist "Test" 20 50 10 \
+$(search_courses ./data/classes.txt AB) --output-fd 1)
+echo "$ipt"

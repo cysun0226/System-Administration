@@ -309,8 +309,8 @@ if [ ! -f "./data/classes.txt" ]; then
 fi
 
 # Data Exists
-dialog --title "CRS" --yes-label 'OK' --no-label 'Exit' --yesno \
-"Welcome to CRS.\n\nFind available courses data.\n\nPress [OK] to start CRS."\
+dialog --title "CRS" --msgbox \
+"\nWelcome to CRS.\n\nFind available courses data.\n\nPress to start CRS."\
  20 50
 
 # Check if current_class exists
