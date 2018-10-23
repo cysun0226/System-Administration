@@ -109,7 +109,7 @@ get_total_time()
 check_conflict()
 {
   for i in $(seq ${#1}); do
-    c=$(echo "$total_time" | cut -c $i-$i)
+    c=$(echo "$1" | cut -c $i-$i)
     if_w=$(echo "$c" | grep '[1-7]')
     # weekday
     if [ "$if_w" != "" ];
@@ -268,7 +268,15 @@ add_class()
   # if [ "$add_result" = "pass" ];
   if [ "$time_conflict" = "0" ];
   then
-    eval 'for word in '$cur_class'; do echo $word; done' > ./data/cur_class.txt
+    dialog --title "Add Class" --yes-label 'YES' --no-label 'Cancel' --yesno \
+    "Saving?" 20 10
+    response=$?
+    case $response in
+      0) eval 'for word in '$cur_class'; do echo $word; done' > ./data/cur_class.txt
+      ;;
+      1)
+      ;;
+    esac
   else
     dialog --title "Warning" --msgbox "Time conflict!" 10 20
   fi
