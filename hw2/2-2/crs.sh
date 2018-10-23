@@ -103,11 +103,12 @@ get_total_time()
     done
     total_time="$total_time$time"
   done < $1
+  echo "$total_time"
 }
 
 check_conflict()
 {
-  for i in $(seq ${#total_time}); do
+  for i in $(seq ${#1}); do
     c=$(echo "$total_time" | cut -c $i-$i)
     if_w=$(echo "$c" | grep '[1-7]')
     # weekday
@@ -138,8 +139,45 @@ search_courses()
   done < ./data/classes.txt
 }
 
+get_free_time_courses()
+{
+  while read a; do
+    x_time=$(echo $a | cut -d'#' -f2 | cut -d'?' -f1)
+    time_cnt=$(echo $x_time | grep -o '-' | wc -l)
+    time=''
+    for t in $(seq $time_cnt); do
+      time="$time$(echo $x_time | cut -d',' -f$t | cut -d'-' -f1)"
+    done
+
+    time_seq=$(echo "$time" | fold -w1 | paste -sd' ' -)
+    available=1
+    for c in $time_seq; do
+      if_w=$(echo "$c" | grep '[1-7]')
+      # weekday
+      if [ "$if_w" != "" ];
+      then
+        day=$c
+      else
+        # time
+        t=$c
+        if_use=$(get_2d_arr used "_$day" "_$t")
+        if [ "$if_use" != "0" ]; then
+          available=0
+        fi
+      fi
+    done
+    if [ "$available" = "1" ]; then
+      id=$(echo $a | cut -d'#' -f1)
+      time=$(echo $a | cut -d'#' -f2 | cut -d'?' -f1)
+      name=$(echo $a | cut -d'?' -f2)
+      printf '[%s] %s - %s\n' "$id" "$time" "$name"
+    fi
+  done < $1
+}
+
 handle_option()
 {
+  update=0
   ipt=$1
   case $ipt in
     op1) show_classroom=$(expr 1 - $show_classroom)
@@ -149,6 +187,7 @@ handle_option()
        else
          opt1_str='Show Class Name'
        fi
+       update=1
        ;;
     op2) show_extra=$(expr 1 - $show_extra)
        if [ $show_extra = 0 ];
@@ -157,6 +196,7 @@ handle_option()
        else
          opt2_str='Hide Extra Column'
        fi
+       update=1
        ;;
     op3) # search courses
         > ./data/input.txt
@@ -164,8 +204,15 @@ handle_option()
         ipt=$(cat ./data/input.txt)
         dialog --title "Courses contain [$ipt]" --msgbox "$(search_courses $ipt)" 50 140
         rm ./data/input.txt
-        update=0
        ;;
+    op4) # search free time courses
+        clean_use_table
+        check_conflict $(get_total_time ./data/cur_class.txt)
+        time_conflict=0
+        printf 'searching...'
+        dialog --title "Time Available Courses" \
+        --msgbox "$(get_free_time_courses ./data/classes.txt)" 50 140
+      ;;
   esac
   echo "generate table..."
 }
@@ -216,8 +263,7 @@ add_class()
   eval 'for word in '$cur_class'; do echo $word; done' > ./data/temp.txt
   # check conflict
   clean_use_table
-  get_total_time ./data/temp.txt
-  check_conflict
+  check_conflict $(get_total_time ./data/temp.txt)
   # add_result=$(./print_table.sh ./data/temp.txt $show_classroom $show_extra 1)
   # if [ "$add_result" = "pass" ];
   if [ "$time_conflict" = "0" ];
@@ -298,8 +344,9 @@ while [ $response != 2 ]; do
     2) exit 0
       ;;
     3) echo "Option"
-      opt=$(dialog --title "Option" --menu "" 12 35 5 \
-      op1 "$opt1_str" op2 "$opt2_str" op3 "Search Courses" --output-fd 1)
+      opt=$(dialog --title "Option" --menu "" 24 70 6 \
+      op1 "$opt1_str" op2 "$opt2_str" op3 "Search Courses"\
+      op4 "Search Free Time Courses" --output-fd 1)
       handle_option $opt
       ;;
   esac
