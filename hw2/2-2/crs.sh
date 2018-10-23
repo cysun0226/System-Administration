@@ -269,16 +269,16 @@ add_class()
   if [ "$time_conflict" = "0" ];
   then
     dialog --title "Add Class" --yes-label 'YES' --no-label 'Cancel' --yesno \
-    "Saving?" 20 10
+    "\n\nSaving?" 10 30
     response=$?
     case $response in
       0) eval 'for word in '$cur_class'; do echo $word; done' > ./data/cur_class.txt
       ;;
-      1)
+      1) update=0
       ;;
     esac
   else
-    dialog --title "Warning" --msgbox "Time conflict!" 20 10
+    dialog --title "Warning" --msgbox "\n\nTime conflict!" 10 30
   fi
   rm ./data/temp.txt
 }
