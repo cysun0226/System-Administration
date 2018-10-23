@@ -184,7 +184,7 @@ handle_option()
     op3) # search courses
         > ./data/input.txt
         dialog --title "Search courses" --inputbox "Target substring:" 20 100 2>./data/input.txt
-        if [ "$?" = "1" ]; then
+        if [ "$?c" = "1" ]; then
           rm ./data/input.txt
           update=0
           return
@@ -234,7 +234,7 @@ add_class()
     >./data/tmp2.txt
     if [ "$3" != "f" ]; then
       off_list_item=$(grep $2 ./data/classes.txt | awk -F# '{printf "%s?%s - %s?off\n",$0,$2,$3}' | sed 's/^/"/' | sed 's/$/"/' | sed 's/?/" "/g')
-      eval dialog --buildlist '"Courses contain [$1]"' 30 110 20 $off_list_item 2>./data/tmp2.txt
+      eval dialog --buildlist '"Courses contain [$2]"' 30 110 20 $off_list_item 2>./data/tmp2.txt
       response=$?
     else
       off_list_item=$(cat ./data/available.txt | awk -F# '{printf "%s?%s - %s?off\n",$0,$2,$3}' | sed 's/^/"/' | sed 's/$/"/' | sed 's/?/" "/g')
