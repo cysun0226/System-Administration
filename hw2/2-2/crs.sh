@@ -178,7 +178,6 @@ get_free_time_courses()
 
 handle_option()
 {
-  update=0
   ipt=$1
   case $ipt in
     op1) show_classroom=$(expr 1 - $show_classroom)
@@ -188,7 +187,6 @@ handle_option()
        else
          opt1_str='Show Class Name'
        fi
-       update=1
        ;;
     op2) show_extra=$(expr 1 - $show_extra)
        if [ $show_extra = 0 ];
@@ -197,13 +195,12 @@ handle_option()
        else
          opt2_str='Hide Extra Column'
        fi
-       update=1
        ;;
     op3) # search courses
         > ./data/input.txt
         dialog --title "Search courses" --inputbox "Target substring:" 20 100 2>./data/input.txt
         ipt=$(cat ./data/input.txt)
-        dialog --title "Courses contain [$ipt]" --msgbox "$(search_courses $ipt)" 50 140
+        add_class $ipt
         rm ./data/input.txt
        ;;
     op4) # search free time courses
@@ -213,49 +210,44 @@ handle_option()
         printf 'searching...'
         dialog --title "Time Available Courses" \
         --msgbox "$(get_free_time_courses ./data/classes.txt)" 50 140
+        update=0
       ;;
   esac
   printf "generate table..."
 }
 
-generate_list_item()
-{
-  # added_class
-  added_id=''
-  while read a; do
-    added_id="$added_id $(echo $a | cut -d'#' -f1)"
-  done < ./data/cur_class.txt
-
-  while read p; do
-    id=$(echo $p | cut -d'#' -f1)
-    time=$(echo $p | cut -d'#' -f2)
-    name=$(echo $p | cut -d'#' -f3)
-
-    on_off='off'
-
-    for a in $added_id; do
-      if [ "$id" = "$a" ]; then
-        on_off='on'
-        break
-      fi
-    done
-
-    printf '"%s" ' "$p"
-    printf '"%s - %s" ' "$time" "$name"
-    printf '"%s" ' "$on_off"
-  done < $1
-}
-
 add_class()
 {
+  # $1 = target
+
   # create empty temp file
   time_conflict=0
   USR_IPT="./data/temp.txt"
   >$USR_IPT
 
-  eval dialog --buildlist '"Add a class"' 30 110 20 "$(generate_list_item ./data/classes.txt)" 2>$USR_IPT
+  if [ "$1" = "all" ];
+  then
+    if [ "$(cat ./data/cur_class.txt)" != "" ]; then
+      off_list_item=$(grep -v -f ./data/cur_class.txt ./data/classes.txt | awk -F# '{printf "%s?%s - %s?off\n",$0,$2,$3}' | sed 's/^/"/' | sed 's/$/"/' | sed 's/?/" "/g')
+    else
+      off_list_item=$(cat ./data/classes.txt | awk -F# '{printf "%s?%s - %s?off\n",$0,$2,$3}' | sed 's/^/"/' | sed 's/$/"/' | sed 's/?/" "/g')
+    fi
+    on_list_item=$(cat ./data/cur_class.txt | awk -F# '{printf "%s?%s - %s?on\n",$0,$2,$3}' | sed 's/^/"/' | sed 's/$/"/' | sed 's/?/" "/g')
+    eval dialog --buildlist '"Add a class"' 30 110 20 $off_list_item $on_list_item 2>$USR_IPT
+    response=$?
+  else
+    >./data/tmp2.txt
+    off_list_item=$(grep $1 ./data/classes.txt | awk -F# '{printf "%s?%s - %s?off\n",$0,$2,$3}' | sed 's/^/"/' | sed 's/$/"/' | sed 's/?/" "/g')
+    eval dialog --buildlist '"Courses contain [$1]"' 30 110 20 $off_list_item 2>./data/tmp2.txt
+    response=$?
+    echo "" >> ./data/tmp2.txt
+    cat ./data/tmp2.txt | sed 's/"//' | tr -d '"' > $USR_IPT
+    cat $USR_IPT > ./data/tmp2.txt
+    cat ./data/tmp2.txt ./data/cur_class.txt | sed 's/^/"/' | sed 's/$/"/' > $USR_IPT
+    rm ./data/tmp2.txt
+  fi
   # cancel
-  if [ "$?" = "1" ]; then
+  if [ "$response" = "1" ]; then
     rm ./data/temp.txt
     update=0
     return
@@ -345,9 +337,9 @@ while [ $response != 2 ]; do
 
   response=$?
   case $response in
-    0) add_class
+    0) add_class 'all'
       while [ $time_conflict = 1 ]; do
-        add_class
+        add_class 'all'
       done
       ;;
     2) exit 0
