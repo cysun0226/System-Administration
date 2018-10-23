@@ -184,7 +184,7 @@ handle_option()
     op3) # search courses
         > ./data/input.txt
         dialog --title "Search courses" --inputbox "Target substring:" 20 100 2>./data/input.txt
-        if [ "$?c" = "1" ]; then
+        if [ "$?" = "1" ]; then
           rm ./data/input.txt
           update=0
           return
