@@ -1,11 +1,5 @@
 #!/bin/sh
 
-get_2d_value()
-{
-  current_value=$1$2$3
-  eval printf '%s' \$$current_value
-}
-
 get_3d_value()
 {
   id=$1$2$3$4
@@ -37,45 +31,6 @@ get_space()
   done
 }
 
-get_time()
-{
-  case $1 in
-    A) echo 1 ;;
-    B) echo 2 ;;
-    C) echo 3 ;;
-    D) echo 4 ;;
-    E) echo 5 ;;
-    F) echo 6 ;;
-    G) echo 7 ;;
-    H) echo 8 ;;
-    I) echo 9 ;;
-    J) echo 10 ;;
-    K) echo 11 ;;
-  esac
-}
-
-get_ex_time()
-{
-  case $1 in
-    M) echo 1 ;;
-    N) echo 2 ;;
-    A) echo 3 ;;
-    B) echo 4 ;;
-    C) echo 5 ;;
-    D) echo 6 ;;
-    X) echo 7 ;;
-    E) echo 8 ;;
-    F) echo 9 ;;
-    G) echo 10 ;;
-    H) echo 11 ;;
-    Y) echo 12 ;;
-    I) echo 13 ;;
-    J) echo 14 ;;
-    K) echo 15 ;;
-    L) echo 16 ;;
-  esac
-}
-
 print_table()
 {
   print_bar $(expr $grid_width \* 5 + 24)
@@ -90,14 +45,12 @@ print_table()
   done
   print_dbar $(expr $grid_width \* 5 + 24)
 
-  t_idx=0
   for t in $time_code; do
-    t_idx=$(expr $t_idx + 1)
     # time row
     printf ' %s' $t
-    for w in $(seq 5); do
+    for w in 1 2 3 4 5; do
       printf ' | '
-      get_3d_value timetable "_$t_idx" "_$w" _1
+      get_3d_value timetable "_$w" "_$t" _1
     done
     printf ' |\n'
 
@@ -106,7 +59,7 @@ print_table()
       printf '  '
       for w in 1 2 3 4 5; do
         printf ' | '
-        get_3d_value timetable "_$t_idx" "_$w" "_$g"
+        get_3d_value timetable "_$w" "_$t" "_$g"
       done
       printf ' |\n'
     done
@@ -128,14 +81,12 @@ print_extra_table()
   done
   print_dbar $(expr $grid_width \* 7 + 32)
 
-  t_idx=0
   for t in $ex_time_code; do
-    t_idx=$(expr $t_idx + 1)
     # time row
     printf ' %s' $t
-    for w in $(seq 7); do
+    for w in 1 2 3 4 5 6 7; do
       printf ' | '
-      get_3d_value ex_timetable "_$t_idx" "_$w" _1
+      get_3d_value timetable "_$w" "_$t" _1
     done
     printf ' |\n'
 
@@ -144,7 +95,7 @@ print_extra_table()
       printf '  '
       for w in 1 2 3 4 5 6 7; do
         printf ' | '
-        get_3d_value ex_timetable "_$t_idx" "_$w" "_$g"
+        get_3d_value timetable "_$w" "_$t" "_$g"
       done
       printf ' |\n'
     done
@@ -154,61 +105,132 @@ print_extra_table()
 
 fill_timetable()
 {
-  # $1 row / $2 col / $3 name
-  # check_conflict
-  if [ "$show_extra" != "1" ]
-  then
-    u=$(get_3d_value timetable "_$row" "_$col" "_1")
-    if [ "$u" != "###############" ]; then
-      conflict=1
+  # $1 weekday / $2 time / $3 name
+  name_length=${#3}
+  if [ "$show_extra" != "1" ];
+  then #
+    if [ $name_length -ge 15 ];
+    then
+      grid_1=$(echo "$3" | cut -c 1-15)
+      eval "timetable_$1_$2_1=\"$grid_1\""
+    else
+      grid_1=$(echo "$3" | cut -c 1-$name_length)
+      grid_1="$grid_1###############"
+      grid_1=$(echo "$grid_1" | cut -c 1-15)
+      eval "timetable_$1_$2_1=\"$grid_1\""
+      return
     fi
+
+    if [ $name_length -ge 30 ];
+    then
+      grid_2=$(echo "$3" | cut -c 16-30)
+      eval "timetable_$1_$2_2=\"$grid_2\""
+    else
+      grid_2=$(echo "$3" | cut -c 16-$name_length)
+      grid_2="$grid_2###############"
+      grid_2=$(echo "$grid_2" | cut -c 1-15)
+      eval "timetable_$1_$2_2=\"$grid_2\""
+      return
+    fi
+
+    if [ $name_length -ge 45 ];
+    then
+      grid_3=$(echo "$3" | cut -c 31-45)
+      eval "timetable_$1_$2_3=\"$grid_3\""
+    else
+      grid_3=$(echo "$3" | cut -c 31-$name_length)
+      grid_3="$grid_3###############"
+      grid_3=$(echo "$grid_3" | cut -c 1-15)
+      eval "timetable_$1_$2_3=\"$grid_3\""
+      return
+    fi
+
+    if [ $name_length -ge 60 ];
+    then
+      grid_4=$(echo "$3" | cut -c 46-60)
+      eval "timetable_$1_$2_4=\"$grid_4\""
+    else
+      grid_4=$(echo "$3" | cut -c 46-$name_length)
+      grid_4="$grid_4###############"
+      grid_4=$(echo "$grid_4" | cut -c 1-15)
+      eval "timetable_$1_$2_3=\"$grid_3\""
+      return
+    fi
+
   else
-    u=$(get_3d_value ex_timetable "_$row" "_$col" "_1")
-    if [ "$u" != "############" ]; then
-      conflict=1
+    if [ $name_length -ge 12 ];
+    then
+      grid_1=$(echo "$3" | cut -c 1-12)
+      eval "timetable_$1_$2_1=\"$grid_1\""
+    else
+      grid_1=$(echo "$3" | cut -c 1-$name_length)
+      grid_1="$grid_1###############"
+      grid_1=$(echo "$grid_1" | cut -c 1-12)
+      eval "timetable_$1_$2_1=\"$grid_1\""
+      return
+    fi
+
+    if [ $name_length -ge 24 ];
+    then
+      grid_2=$(echo "$3" | cut -c 13-24)
+      eval "timetable_$1_$2_2=\"$grid_2\""
+    else
+      grid_2=$(echo "$3" | cut -c 13-$name_length)
+      grid_2="$grid_2###############"
+      grid_2=$(echo "$grid_2" | cut -c 1-12)
+      eval "timetable_$1_$2_2=\"$grid_2\""
+      return
+    fi
+
+    if [ $name_length -ge 36 ];
+    then
+      grid_3=$(echo "$3" | cut -c 25-36)
+      eval "timetable_$1_$2_3=\"$grid_3\""
+    else
+      grid_3=$(echo "$3" | cut -c 31-$name_length)
+      grid_3="$grid_3###############"
+      grid_3=$(echo "$grid_3" | cut -c 1-12)
+      eval "timetable_$1_$2_3=\"$grid_3\""
+      return
+    fi
+
+    if [ $name_length -ge 48 ];
+    then
+      grid_4=$(echo "$3" | cut -c 37-48)
+      eval "timetable_$1_$2_4=\"$grid_4\""
+    else
+      grid_4=$(echo "$3" | cut -c 37-$name_length)
+      grid_4="$grid_4###############"
+      grid_4=$(echo "$grid_4" | cut -c 1-12)
+      eval "timetable_$1_$2_3=\"$grid_3\""
+      return
     fi
   fi
 
-  if [ "$check_conflict" != "0" ]; then
-    if [ "$show_extra" != "1" ]; then
-      eval "timetable_${row}_${col}_1=0"
-    else
-      eval "ex_timetable_${row}_${col}_1=0"
-    fi
-    return
-  fi
-
-  # fill
-
-  lc=$(expr ${#3} / $grid_width + 1)
-
-  for i in $(seq $lc); do
-    grid_row=''
-    # i*GRID_LEN
-    igl=$(expr $i \* $grid_width - $grid_width + $i )
-    # (i+1)*GRID_LEN
-    ipl=$(expr $i \* $grid_width )
-    if [ ${#3} -gt $ipl ];
-    then
-      grid_row=$(echo "$3" | cut -c $igl-$(expr $igl + $grid_width))
-    else
-      grid_row=$(echo "$3" | cut -c $igl-$(expr ${#3} + 1 ))
-    fi
-
-    # fill the row
-    if [ "$grid_row" = "" ]; then
-      break;
-    fi
-    grid_row="$grid_row###############"
-    grid_row=$(echo $grid_row | cut -c 1-$(expr $grid_width + 1))
-
-    if [ "$show_extra" = "0" ];
-    then
-      eval "timetable_${row}_${col}_${i}=\"$grid_row\""
-    else
-      eval "ex_timetable_${row}_${col}_${i}=\"$grid_row\""
-    fi
-  done
+  # lc=$(expr ${#3} / $grid_width + 1)
+  #
+  # for i in $(seq $lc); do
+  #   grid_row=''
+  #   # i*GRID_LEN
+  #   igl=$(expr $i \* $grid_width - $grid_width + $i )
+  #   # (i+1)*GRID_LEN
+  #   ipl=$(expr $i \* $grid_width )
+  #   if [ ${#3} -gt $ipl ];
+  #   then
+  #     grid_row=$(echo "$3" | cut -c $igl-$(expr $igl + $grid_width))
+  #   else
+  #     grid_row=$(echo "$3" | cut -c $igl-$(expr ${#3} + 1 ))
+  #   fi
+  #
+  #   # fill the row
+  #   if [ "$grid_row" = "" ]; then
+  #     break;
+  #   fi
+  #   grid_row="$grid_row###############"
+  #   grid_row=$(echo $grid_row | cut -c 1-$(expr $grid_width + 1))
+  #
+  #   eval "timetable_$1_$2_$i=\"$grid_row\""
+  # done
 }
 
 parse_class()
@@ -233,33 +255,16 @@ parse_class()
     name="$room"
   fi
 
-  for i in $(seq ${#time}); do
-    c=$(echo "$time" | cut -c $i-$i)
+  time_seq=$(echo "$time" | fold -w1 | paste -sd' ' -)
+  for c in $time_seq; do
     # weekday
     if_w=$(echo "$c" | grep '[1-7]')
-    if [ "$if_w" != "" ]; then
-      col=$c
+    if [ "$if_w" != "" ];
+    then
+      day=$c
+    else
+      fill_timetable $day $c "$name"
     fi
-    # time
-    if echo "$c" | grep -q '[A-K]'; then
-      if [ "$show_extra" != "1" ];
-      then
-        row=$(get_time $c)
-      else
-        row=$(get_ex_time $c)
-      fi
-
-      if [ "$show_extra" != "1" ]; then
-        if_w=$(echo "$col" | grep '[1-5]')
-      else
-        if_w=$(echo "$col" | grep '[1-7]')
-      fi
-
-      if [ "$if_w" != "" ]; then
-        fill_timetable $row $col "$name"
-      fi
-    fi
-
   done
 }
 
@@ -277,55 +282,37 @@ check_conflict=0
 # declare array
 init()
 {
-  if [ "$show_extra" = "0" ];
-  then
-    for r in $(seq 11); do
-      for c in $(seq 5); do
-        for l in $(seq 4); do
-          eval "timetable_${r}_${c}_${l}='###############'"
-        done
-      done
-    done
-  else
+  fill='###############'
+  if [ "$show_extra" = "1" ]; then
     grid_width=11
-    for r in $(seq 16); do
-      for c in $(seq 7); do
-        for l in $(seq 4); do
-          eval "ex_timetable_${r}_${c}_${l}='############'"
-        done
+    fill='############'
+  fi
+
+  for d in 1 2 3 4 5 6 7; do
+    for t in M N A B C D X E F G H Y I J K L; do
+      for l in 1 2 3 4; do
+        eval "timetable_${d}_${t}_${l}=$fill"
       done
     done
-  fi
+  done
 }
 
 # main =====
 # $1: cur_class.txt
 # $2: show_classroom
 # $3: show_extra
-# $4: check_conflict
 
 show_classroom="$2"
 show_extra="$3"
-check_conflict="$4"
 init
 
 while read p; do
   parse_class "$p"
 done < $1
 
-if [ "$check_conflict" != "0" ];
+if [ "$show_extra" != "1" ];
 then
-  if [ "$conflict" != "0" ];
-  then
-    echo "conflict"
-  else
-    echo "pass"
-  fi
+  print_table
 else
-  if [ "$show_extra" != "1" ];
-  then
-    print_table
-  else
-    print_extra_table
-  fi
+  print_extra_table
 fi
