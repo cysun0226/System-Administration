@@ -42,7 +42,7 @@ get_json_value()
       if [ "$rdd" = "1" ]; then
         return
       fi
-      printf '%s?' "$v"
+      printf '%s#' "$v"
     ;;
     3) #name
       cnt=0
@@ -95,7 +95,7 @@ get_total_time()
 {
   total_time=''
   while read a; do
-    x_time=$(echo $a | cut -d'#' -f2 | cut -d'?' -f1)
+    x_time=$(echo $a | cut -d'#' -f2)
     time_cnt=$(echo $x_time | grep -o '-' | wc -l)
     time=''
     for t in $(seq $time_cnt); do
@@ -129,20 +129,21 @@ check_conflict()
 
 search_courses()
 {
-  target=$1
-  while read p; do
-    if [ "$(echo "$p" | grep "$target")" != "" ]; then
-      time=$(echo $p | cut -d'#' -f2 | cut -d'?' -f1)
-      name=$(echo $p | cut -d'?' -f2)
-      printf '%s - %s\n' "$time" "$name"
-    fi
-  done < ./data/classes.txt
+  grep "$1" ./data/classes.txt
+  # target=$1
+  # while read p; do
+  #   if [ "$(echo "$p" | grep "$target")" != "" ]; then
+  #     time=$(echo $p | cut -d'#' -f2 | cut -d'?' -f1)
+  #     name=$(echo $p | cut -d'?' -f2)
+  #     printf '%s - %s\n' "$time" "$name"
+  #   fi
+  # done < ./data/classes.txt
 }
 
 get_free_time_courses()
 {
   while read a; do
-    x_time=$(echo $a | cut -d'#' -f2 | cut -d'?' -f1)
+    x_time=$(echo $a | cut -d'#' -f2)
     time_cnt=$(echo $x_time | grep -o '-' | wc -l)
     time=''
     for t in $(seq $time_cnt); do
@@ -168,8 +169,8 @@ get_free_time_courses()
     done
     if [ "$available" = "1" ]; then
       id=$(echo $a | cut -d'#' -f1)
-      time=$(echo $a | cut -d'#' -f2 | cut -d'?' -f1)
-      name=$(echo $a | cut -d'?' -f2)
+      time=$(echo $a | cut -d'#' -f2)
+      name=$(echo $a | cut -d'#' -f3)
       printf '[%s] %s - %s\n' "$id" "$time" "$name"
     fi
   done < $1
@@ -227,8 +228,8 @@ generate_list_item()
 
   while read p; do
     id=$(echo $p | cut -d'#' -f1)
-    time=$(echo $p | cut -d'#' -f2 | cut -d'?' -f1)
-    name=$(echo $p | cut -d'?' -f2)
+    time=$(echo $p | cut -d'#' -f2)
+    name=$(echo $p | cut -d'#' -f3)
 
     on_off='off'
 
