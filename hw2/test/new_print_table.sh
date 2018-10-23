@@ -1,11 +1,5 @@
 #!/bin/sh
 
-get_2d_value()
-{
-  current_value=$1$2$3
-  eval printf '%s' \$$current_value
-}
-
 get_3d_value()
 {
   id=$1$2$3$4
@@ -35,45 +29,6 @@ get_space()
   for i in $(seq $1); do
     printf '#'
   done
-}
-
-get_time()
-{
-  case $1 in
-    A) echo 1 ;;
-    B) echo 2 ;;
-    C) echo 3 ;;
-    D) echo 4 ;;
-    E) echo 5 ;;
-    F) echo 6 ;;
-    G) echo 7 ;;
-    H) echo 8 ;;
-    I) echo 9 ;;
-    J) echo 10 ;;
-    K) echo 11 ;;
-  esac
-}
-
-get_ex_time()
-{
-  case $1 in
-    M) echo 1 ;;
-    N) echo 2 ;;
-    A) echo 3 ;;
-    B) echo 4 ;;
-    C) echo 5 ;;
-    D) echo 6 ;;
-    X) echo 7 ;;
-    E) echo 8 ;;
-    F) echo 9 ;;
-    G) echo 10 ;;
-    H) echo 11 ;;
-    Y) echo 12 ;;
-    I) echo 13 ;;
-    J) echo 14 ;;
-    K) echo 15 ;;
-    L) echo 16 ;;
-  esac
 }
 
 print_table()
@@ -245,7 +200,6 @@ init()
 # $1: cur_class.txt
 # $2: show_classroom
 # $3: show_extra
-# $4: check_conflict
 
 show_classroom="$2"
 show_extra="$3"
