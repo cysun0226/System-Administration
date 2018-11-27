@@ -2,10 +2,10 @@ from argparse import ArgumentParser
 import subprocess
 import shlex
 import time
-
+import os
 # get dataset
 def get_dataset_name(dataset, id):
-    cmd = "zfs list -r -t snapshot -o name " + dataset + " | sed 1d"
+    cmd = "zfs list -r -t snapshot -o name " + dataset
     args = shlex.split(cmd)
     result = subprocess.check_output(args)
     result = result.split("\n")
@@ -88,13 +88,18 @@ def delete(dataset, id=None):
         subprocess.check_call(args)
 
 # export
-def export(dataset, id=1):
+def export(dataset, id):
+    if id == None:
+        id = 1
+    else:
+        id = int(id)
+    
     # export snapshot to file
     dataset_name = get_dataset_name(dataset, id)
-    cmd = "zfs send -R" + dataset_name + " > " + "~/ftp_backup/export/" + dataset_name.replace("/", "_")
+    cmd = "zfs send -R " + dataset_name + " > " + "~/ftp_backup/export/" + dataset_name.replace("/", "_")
     dataset_name = dataset_name.replace("/", "_")
-    args = shlex.split(cmd)
-    subprocess.check_call(args)
+    p = subprocess.Popen(cmd, shell=True)
+    os.waitpid(p.pid, 0)
 
     # compress
     cmd = "xz -z ~/ftp_backup/export/" + dataset_name
