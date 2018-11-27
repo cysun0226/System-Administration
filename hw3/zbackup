@@ -1,3 +1,5 @@
+#! /usr/local/bin/python2.7
+
 from argparse import ArgumentParser
 import subprocess
 import shlex
@@ -17,7 +19,7 @@ def get_dataset_name(dataset, id):
 # create
 def create(dataset, rot_cnt):
     print("[snapshot] " + dataset + "@" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime()))
-    cmd = "zfs snapshot " + dataset + "@" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
+    cmd = "sudo zfs snapshot " + dataset + "@" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
     args = shlex.split(cmd)
     subprocess.check_call(args)
 
@@ -78,12 +80,12 @@ def delete(dataset, id=None):
 
     if id == None: # delete all the snapshots of this dataset
         for snapshot in result:
-            cmd = "zfs destroy " + snapshot
+            cmd = "sudo zfs destroy " + snapshot
             args = shlex.split(cmd)
             subprocess.check_call(args)
     else:
         snapshot = result[int(id)-1]
-        cmd = "zfs destroy " + snapshot
+        cmd = "sudo zfs destroy " + snapshot
         args = shlex.split(cmd)
         subprocess.check_call(args)
 
@@ -98,7 +100,7 @@ def export(dataset, id):
 
     # export snapshot to file
     dataset_name = get_dataset_name(dataset, id)
-    cmd = "zfs send -R " + dataset_name + " > " + "/home/cysun/ftp_backup/export/" + dataset_name.replace("/", "_")
+    cmd = "sudo zfs send -R " + dataset_name + " > " + "/home/cysun/ftp_backup/export/" + dataset_name.replace("/", "_")
     dataset_name = dataset_name.replace("/", "_")
     dataset_name = "/home/cysun/ftp_backup/export/" + dataset_name
     p = subprocess.Popen(cmd, shell=True)
@@ -122,14 +124,15 @@ def export(dataset, id):
     print("Successfully export as [" + dataset_name.split("/")[-1] + ".xz.enc]")
 
 def _import(dataset, filename):
-    filename = "/home/cysun/ftp_backup/export/" + filename
+    print("[import] from file '" + filename + "'")
+    path_filename = "/home/cysun/ftp_backup/export/" + filename
     # decrypt
-    cmd = "openssl enc -aes256 -d -in " + filename + " -out " + filename[:-4]
+    cmd = "openssl enc -aes256 -d -in " + path_filename + " -out " + path_filename[:-4]
     args = shlex.split(cmd)
     subprocess.check_call(args)
 
     # uncompress
-    cmd = "xz -d " + filename[:-4]
+    cmd = "xz -d " + path_filename[:-4]
     args = shlex.split(cmd)
     subprocess.check_call(args)
 
@@ -137,19 +140,12 @@ def _import(dataset, filename):
     delete(dataset)
 
     # import
-    cmd = "sudo zfs receive -F " + filename.split("@")[0] + " < " + filename[:-7]
+    cmd = "sudo zfs receive -F " + dataset + " < " + path_filename[:-7]
     p = subprocess.Popen(cmd, shell=True)
     os.waitpid(p.pid, 0)
+    print("Successfully import to '" + dataset + "'")
 
-# test subprocess
-def test():
-    # result = subprocess.check_output(args)
-    result = subprocess.check_output(["cat", "zfs_list.txt"])
-    result = result.split("\n")
-    if len(result) > 5:
-        for i in range(0, 5):
-            print("delete" + result[i])
-
+# parse command
 parser = ArgumentParser(usage="./zbackup [[--list | --delete | --export] target-dataset [ID] | [--import] target-dataset filename | target-dataset [rotation count]]")
 
 # zbackup [[--list | --delete | --export] target-dataset [ID] | [-- import] target-dataset filename | target dataset [rotation count]]
