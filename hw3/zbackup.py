@@ -139,7 +139,7 @@ parser.add_argument("id_cnt", help="ID/import-filename/rotation count", nargs="?
 args = parser.parse_args()
 
 if args.list == True:
-    list(args.dataset, args.id_cnt)
+    list(args.dataset)
 elif args.delete == True:
     delete(args.dataset, args.id_cnt)
 elif args.export == True:
