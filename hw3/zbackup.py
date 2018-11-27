@@ -94,11 +94,13 @@ def export(dataset, id):
     else:
         id = int(id)
 
+    print("[export] " + dataset + " to ~/ftp_backup/export/")
+
     # export snapshot to file
     dataset_name = get_dataset_name(dataset, id)
     cmd = "zfs send -R " + dataset_name + " > " + "/home/cysun/ftp_backup/export/" + dataset_name.replace("/", "_")
     dataset_name = dataset_name.replace("/", "_")
-    dataset_name = "/home/cysun/" + dataset_name
+    dataset_name = "/home/cysun/ftp_backup/export/" + dataset_name
     p = subprocess.Popen(cmd, shell=True)
     os.waitpid(p.pid, 0)
 
@@ -108,7 +110,7 @@ def export(dataset, id):
     subprocess.check_call(args)
 
     # encrypt
-    cmd = "openssl aes256 -in " + dataset_name + ".xz + -out " + dataset_name + ".xz.enc"
+    cmd = "openssl aes256 -in " + dataset_name + ".xz -out " + dataset_name + ".xz.enc"
     args = shlex.split(cmd)
     subprocess.check_call(args)
 
@@ -116,6 +118,8 @@ def export(dataset, id):
     cmd = "rm " + dataset_name + ".xz"
     args = shlex.split(cmd)
     subprocess.check_call(args)
+
+    print("Successfully export as [" + dataset_name.split("/")[-1] + ".xz.enc]")
 
 def _import(dataset, filename):
     filename = "/home/cysun/ftp_backup/export/" + filename
