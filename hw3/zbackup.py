@@ -35,12 +35,13 @@ def list(dataset):
     # list all the snapshot
     # check_output: Run command with arguments and return its output as a byte string.
     if dataset == None:
-        cmd = "zfs list -r -t snapshot -o name | sed 1d" # remove first line (Name)
+        cmd = "zfs list -r -t snapshot -o name" # remove first line (Name)
     else:
-        cmd = "zfs list -r -t snapshot -o name " + dataset + " | sed 1d"
+        cmd = "zfs list -r -t snapshot -o name " + dataset
     args = shlex.split(cmd)
     result = subprocess.check_output(args)
     result.reverse()
+    result.pop()
     print("ID".ljust(10) + "Dataset".ljust(20) + "Time".ljust(20) + "\n")
     dataset_list = {}
     for line in result.split("\n"):
