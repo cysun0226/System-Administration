@@ -13,19 +13,27 @@ def get_dataset_name(dataset, id):
     return result[id-1]
 
 # create
-def create(dataset, rot_cnt=20):
+def create(dataset, rot_cnt):
+    print("[snapshot] " + dataset + "@" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime()))
     cmd = "zfs snapshot " + dataset + "@" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
     args = shlex.split(cmd)
     subprocess.check_call(args)
+
     # check snapshot counts
-    cmd = "zfs list -r -t snapshot -o name " + dataset + " | sed 1d"
+    cmd = "zfs list -r -t snapshot -o name " + dataset
     args = shlex.split(cmd)
     result = subprocess.check_output(args)
     result = result.split("\n")
+    result.pop() # the last element is null str
     result.reverse()
+    result.pop()
 
-    if len(result) > rot_cnt:
-        for i in range(0, rot_cnt):
+    if rot_cnt == None:
+        rot_cnt = 20
+    if len(result) > int(rot_cnt):
+        print("- reach rotation count")
+        for i in range(int(rot_cnt), len(result)):
+            print("[delete] " + result[i])
             cmd = "zfs destroy " + result[i]
             args = shlex.split(cmd)
             subprocess.check_call(args)
