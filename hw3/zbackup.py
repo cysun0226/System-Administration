@@ -3,11 +3,32 @@ import subprocess
 import shlex
 import time
 
+# get dataset
+def get_dataset_name(dataset, id):
+    cmd = "zfs list -r -t snapshot -o name " + dataset + " | sed 1d"
+    args = shlex.split(cmd)
+    result = subprocess.check_output(args)
+    result = result.split("\n")
+    result.reverse()
+    return result[id-1]
+
 # create
 def create(dataset, rot_cnt=20):
     cmd = "zfs snapshot " + dataset + "@" + time.strftime("%Y-%m-%d_%H:%M:%S", time.localtime())
     args = shlex.split(cmd)
-    print(subprocess.check_output(args))
+    subprocess.check_call(args)
+    # check snapshot counts
+    cmd = "zfs list -r -t snapshot -o name " + dataset + " | sed 1d"
+    args = shlex.split(cmd)
+    result = subprocess.check_output(args)
+    result = result.split("\n")
+    result.reverse()
+
+    if len(result) > rot_cnt:
+        for i in range(0, rot_cnt):
+            cmd = "zfs destroy " + result[i]
+            args = shlex.split(cmd)
+            subprocess.check_call(args)
 
 # list
 def list(dataset):
@@ -19,6 +40,7 @@ def list(dataset):
         cmd = "zfs list -r -t snapshot -o name " + dataset + " | sed 1d"
     args = shlex.split(cmd)
     result = subprocess.check_output(args)
+    result.reverse()
     print("ID".ljust(10) + "Dataset".ljust(20) + "Time".ljust(20) + "\n")
     dataset_list = {}
     for line in result.split("\n"):
@@ -31,7 +53,7 @@ def list(dataset):
             print(str(dataset_list[line[0]]).ljust(10) + line[0].ljust(20) + line[1].ljust(20))
 
 # delete
-def delete(dataset, id):
+def delete(dataset, id=None):
     # get all the snapshot
     cmd = "zfs list -r -t snapshot -o name " + dataset + " | sed 1d"
     args = shlex.split(cmd)
@@ -43,30 +65,63 @@ def delete(dataset, id):
             args = shlex.split(cmd)
             subprocess.check_call(args)
     else:
-        snapshot = result.split("\n")[int(id)-1]
+        snapshot = result.split("\n").reverse()[int(id)-1]
         cmd = "zfs destroy " + snapshot
         args = shlex.split(cmd)
         subprocess.check_call(args)
 
+# export
+def export(dataset, id=1):
+    # export snapshot to file
+    dataset_name = get_dataset_name(dataset, id)
+    cmd = "zfs send -R" + dataset_name + " > " + "~/ftp_backup/export/" + dataset_name.replace("/", "_")
+    dataset_name = dataset_name.replace("/", "_")
+    args = shlex.split(cmd)
+    subprocess.check_call(args)
 
+    # compress
+    cmd = "xz -z ~/ftp_backup/export/" + dataset_name
+    args = shlex.split(cmd)
+    subprocess.check_call(args)
 
+    # encrypt
+    cmd = "openssl aes256 -in ~/ftp_backup/export/" + dataset_name + ".xz + -out ~/ftp_backup/export/" + dataset_name + ".xz.enc"
+    args = shlex.split(cmd)
+    subprocess.check_call(args)
 
+    # remove reduntant .xz file
+    cmd = "rm ~/ftp_backup/export/" + dataset_name + ".xz"
+    args = shlex.split(cmd)
+    subprocess.check_call(args)
+
+def _import(dataset, filename):
+    filename = "~/ftp_backup/export/" + filename
+    # decrypt
+    cmd = "openssl enc -aes256 -d -in " + filename + " -out " + filename[:-4]
+    args = shlex.split(cmd)
+    subprocess.check_call(args)
+
+    # uncompress
+    cmd = "xz -d " + filename[:-4]
+    args = shlex.split(cmd)
+    subprocess.check_call(args)
+
+    # clean the previous snapshot
+    delete(dataset)
+
+    # import
+    cmd = "sudo zfs receive -F " + filename.split("@")[0] + " < " + filename[:-7]
+    args = shlex.split(cmd)
+    subprocess.check_call(args)
 
 # test subprocess
 def test():
-    result = subprocess.check_output(["sed", "1d","test.txt"])
-    print("ID".ljust(10) + "Dataset".ljust(20) + "Time".ljust(20))
-    # print(result.split("\n"))
-    dataset_list = {}
-    for line in result.split("\n"):
-        if line != "":
-            line = line.split("@")
-            if line[0] not in dataset_list:
-                dataset_list[line[0]] = 1
-            else:
-                dataset_list[line[0]] += 1
-            print(str(dataset_list[line[0]]).ljust(10) + line[0].ljust(20) + line[1].ljust(20))
-    # print(result)
+    # result = subprocess.check_output(args)
+    result = subprocess.check_output(["cat", "zfs_list.txt"])
+    result = result.split("\n")
+    if len(result) > 5:
+        for i in range(0, 5):
+            print("delete" + result[i])
 
 parser = ArgumentParser(usage="./zbackup [[--list | --delete | --export] target-dataset [ID] | [--import] target-dataset filename | target-dataset [rotation count]]")
 
@@ -83,21 +138,17 @@ parser.add_argument("id_cnt", help="ID/import-filename/rotation count", nargs="?
 
 args = parser.parse_args()
 
-test()
-
 if args.list == True:
-    print("list!")
+    print("opt = list")
+    print("dataset = " + args.dataset)
+    if args.id_cnt != None:
+        print(args.id_cnt)
+    # list(args.dataset, args.id_cnt)
 elif args.delete == True:
-    print("delete!")
+    delete(args.dataset, args.id_cnt)
 elif args.export == True:
-    print("export!")
+    export(args.dataset, args.id_cnt)
 elif args._import == True:
-    print("import!")
+    _import(args.dataset, args.id_cnt)
 else: # create
-    create(args.dataset)
-
-print("args.dataset = " + args.dataset)
-if args.id_cnt != None:
-    print("args.id_cnt = " + args.id_cnt)
-# print("delete arg = " + args.dataset)
-# print("export arg = " + args.dataset)
+    create(args.dataset, args.id_cnt)
