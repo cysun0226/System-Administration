@@ -9,7 +9,9 @@ def get_dataset_name(dataset, id):
     args = shlex.split(cmd)
     result = subprocess.check_output(args)
     result = result.split("\n")
+    result.pop()
     result.reverse()
+    result.pop()
     return result[id-1]
 
 # create
@@ -49,6 +51,7 @@ def list(dataset):
     args = shlex.split(cmd)
     result = subprocess.check_output(args)
     result = result.split("\n")
+    result.pop()
     result.reverse()
     result.pop()
     print("ID".ljust(10) + "Dataset".ljust(20) + "Time".ljust(20))
@@ -65,17 +68,21 @@ def list(dataset):
 # delete
 def delete(dataset, id=None):
     # get all the snapshot
-    cmd = "zfs list -r -t snapshot -o name " + dataset + " | sed 1d"
+    cmd = "zfs list -r -t snapshot -o name " + dataset
     args = shlex.split(cmd)
     result = subprocess.check_output(args)
+    result = result.split("\n")
+    result.pop()
+    result.reverse()
+    result.pop()
 
     if id == None: # delete all the snapshots of this dataset
-        for snapshot in result.split("\n"):
+        for snapshot in result:
             cmd = "zfs destroy " + snapshot
             args = shlex.split(cmd)
             subprocess.check_call(args)
     else:
-        snapshot = result.split("\n").reverse()[int(id)-1]
+        snapshot = result[int(id)-1]
         cmd = "zfs destroy " + snapshot
         args = shlex.split(cmd)
         subprocess.check_call(args)
