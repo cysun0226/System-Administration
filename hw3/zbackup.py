@@ -93,31 +93,32 @@ def export(dataset, id):
         id = 1
     else:
         id = int(id)
-    
+
     # export snapshot to file
     dataset_name = get_dataset_name(dataset, id)
-    cmd = "zfs send -R " + dataset_name + " > " + "~/ftp_backup/export/" + dataset_name.replace("/", "_")
+    cmd = "zfs send -R " + dataset_name + " > " + "/home/cysun/ftp_backup/export/" + dataset_name.replace("/", "_")
     dataset_name = dataset_name.replace("/", "_")
+    dataset_name = "/home/cysun/" + dataset_name
     p = subprocess.Popen(cmd, shell=True)
     os.waitpid(p.pid, 0)
 
     # compress
-    cmd = "xz -z ~/ftp_backup/export/" + dataset_name
+    cmd = "xz -z " + dataset_name
     args = shlex.split(cmd)
     subprocess.check_call(args)
 
     # encrypt
-    cmd = "openssl aes256 -in ~/ftp_backup/export/" + dataset_name + ".xz + -out ~/ftp_backup/export/" + dataset_name + ".xz.enc"
+    cmd = "openssl aes256 -in " + dataset_name + ".xz + -out " + dataset_name + ".xz.enc"
     args = shlex.split(cmd)
     subprocess.check_call(args)
 
     # remove reduntant .xz file
-    cmd = "rm ~/ftp_backup/export/" + dataset_name + ".xz"
+    cmd = "rm " + dataset_name + ".xz"
     args = shlex.split(cmd)
     subprocess.check_call(args)
 
 def _import(dataset, filename):
-    filename = "~/ftp_backup/export/" + filename
+    filename = "/home/cysun/ftp_backup/export/" + filename
     # decrypt
     cmd = "openssl enc -aes256 -d -in " + filename + " -out " + filename[:-4]
     args = shlex.split(cmd)
@@ -133,8 +134,8 @@ def _import(dataset, filename):
 
     # import
     cmd = "sudo zfs receive -F " + filename.split("@")[0] + " < " + filename[:-7]
-    args = shlex.split(cmd)
-    subprocess.check_call(args)
+    p = subprocess.Popen(cmd, shell=True)
+    os.waitpid(p.pid, 0)
 
 # test subprocess
 def test():
