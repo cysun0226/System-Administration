@@ -40,9 +40,10 @@ def list(dataset):
         cmd = "zfs list -r -t snapshot -o name " + dataset
     args = shlex.split(cmd)
     result = subprocess.check_output(args)
-    result = result.split("\n").reverse()
+    result = result.split("\n")
+    result.reverse()
     result.pop()
-    print("ID".ljust(10) + "Dataset".ljust(20) + "Time".ljust(20) + "\n")
+    print("ID".ljust(10) + "Dataset".ljust(20) + "Time".ljust(20))
     dataset_list = {}
     for line in result:
         if line != "":
