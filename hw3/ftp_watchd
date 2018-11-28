@@ -1,0 +1,83 @@
+#! /bin/sh
+# /etc/init.d/ftp_watch
+#
+
+
+. /etc/rc.subr
+
+name=ftp_watchd
+rcvar=ftp_watchd_enable
+
+command="/usr/local/bin/${name}"
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+restart_cmd="${name}_restart"
+status_cmd="${name}_status"
+poll_cmd="${name}_poll"
+
+procname=ftp_watchd
+ftp_watchd_pidfile="/var/run/${name}.pid"
+
+# start
+ftp_watch_start()
+{
+  if [ -e ${pidfile} ]; then
+    echo 'ftp_watchd already running'
+  else
+    echo "Starting ${name}."
+    ${command} --daemon
+  fi
+}
+
+# stop
+ftp_watch_stop()
+{
+  if [ -e ${pidfile} ]; then
+	   echo "Stopping ${name}."
+	   kill -s TERM `cat ${pidfile}`
+  else
+	   echo 'ftp_watchd is not running.'
+  fi
+}
+
+# restart
+ftp_watch_restart()
+{
+    echo "Restarting ${name} ..."
+    ftp_watch_stop
+    sleep 2
+    ftp_watch_start
+}
+
+# status
+ftp_watch_status()
+{
+  if [ -e ${pidfile} ]; then
+    pid=`cat ${pidfile}`
+    echo "ftp_watchd is running as ${pid}."
+    return 0
+  else
+    echo 'ftp_watchd is not running.'
+    return 1
+  fi
+}
+
+run_rc_command "$@"
+
+# case "$1" in
+#   start)
+#     echo "Start ftp_watch ..."
+#     ;;
+#   stop)
+#     echo "Stop ftp_watch"
+#     ;;
+#   restart)
+#     echo "Stop ftp_watch"
+#     echo "Start ftp_watch ..."
+#     ;;
+#   status)
+#     echo "ftp_watch is running as pid xx."
+#
+# esac
+#
+# exit 0
