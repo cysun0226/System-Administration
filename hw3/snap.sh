@@ -1,0 +1,1 @@
+zbackup mypool/public
